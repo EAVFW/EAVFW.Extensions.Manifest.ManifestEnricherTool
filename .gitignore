@@ -6,4 +6,6 @@
 bin
 obj
 /src/EAVFW.Extensions.Manifest.ManifestEnricherTool/Properties/launchSettings.json
-/node_modules
+node_modules
+/.github/workflows/package.json
+/.github/workflows/package-lock.json

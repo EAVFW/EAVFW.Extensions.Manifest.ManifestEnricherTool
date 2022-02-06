@@ -7,6 +7,12 @@
     <Nullable>enable</Nullable>
     <PackAsTool>true</PackAsTool>
 	<ToolCommandName>eavfw-manifest</ToolCommandName>
+
+	  <Title>ManifestEnricherTool</Title>
+	  <Authors>Poul Kjeldager</Authors>
+	  <Description>A tool to enrich and transform manifest.json to manifest.g.json</Description>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/EAVFW/EAVFW.Extensions.Manifest.ManifestEnricherTool</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
