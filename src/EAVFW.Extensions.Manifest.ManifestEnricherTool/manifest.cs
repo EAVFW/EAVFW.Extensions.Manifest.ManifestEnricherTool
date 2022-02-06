@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -43,7 +44,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 
             return jToken as JObject;
         }
-        private JObject CreateAttribute(JObject attr, string displayName, object type, string schemaName = null, object additionalProps = null)
+        private JObject CreateAttribute(JObject attr, string displayName, object type, string? schemaName = null, object? additionalProps = null)
         {
             if (additionalProps != null)
                 return Merge(Merge(attr, new { displayName, type, schemaName }), additionalProps);

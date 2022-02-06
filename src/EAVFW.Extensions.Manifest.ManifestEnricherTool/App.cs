@@ -7,8 +7,10 @@ using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
+using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 public class App : RootCommand
 {
@@ -25,7 +27,7 @@ public class App : RootCommand
         Add(Path);
         Add(Prefix);
 
-        Handler = CommandHandler.Create(Run);
+        Handler = CommandHandler.Create<ParseResult,IConsole>(Run);
     }
 
     public async Task Run(ParseResult parseResult, IConsole console) //(string path, string customizationprefix)
@@ -39,6 +41,7 @@ public class App : RootCommand
 
         using (var fs = File.OpenRead(path))
         {
+            
 
 
             JsonDocument json = await cmd.LoadJsonDocumentAsync(fs, customizationprefix, logger);
