@@ -90,6 +90,7 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
 
         }
 
+
         var csprojct = Directory.GetFiles(Path.GetDirectoryName(manifestFilePath), "*.csproj");
         console.WriteLine($"Found {csprojct.Length} projects for '{manifestFilePath}'");
         if (csprojct.Length==1)

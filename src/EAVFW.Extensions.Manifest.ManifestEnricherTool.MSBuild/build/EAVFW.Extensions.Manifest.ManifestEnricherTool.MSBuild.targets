@@ -1,0 +1,22 @@
+﻿<Project ToolsVersion="15.0"  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+
+		<ManifestPath Condition="$(ManifestPath) == ''">manifest.json</ManifestPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<DotNetCliToolReference Include="EAVFW.Extensions.Manifest.ManifestEnricherTool" Version="*" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<AdditionalFiles Include="obj/manifest.g.json" />
+	</ItemGroup>
+
+
+	<Target Name="GenerateIfMissing" BeforeTargets="BeforeBuild" Condition="!Exists('$(MSBuildProjectDirectory)\obj\manifest.g.json')">
+		<Message Importance="high" Text="Generating Manifest" />
+		<CallTarget Targets="GenerateManifest" />
+	</Target>
+
+
+</Project>
