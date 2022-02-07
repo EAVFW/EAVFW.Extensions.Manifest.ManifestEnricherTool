@@ -67,11 +67,16 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
 
         console.WriteLine(manifest.ToString(Formatting.Indented));
 
-        if (File.Exists("manifest.json"))
-        {
-            File.Copy("manifest.json", "manifest.bac.json");
+        var manifestFilePath = Directory.GetFiles(Directory.GetCurrentDirectory(), "manifest.json", SearchOption.AllDirectories)
+            .Where(c=>Directory.GetFiles(Path.GetDirectoryName(c),"*.csproj").Any())
+            .SingleOrDefault();
 
-            var original = JToken.Parse(File.ReadAllText("manifest.json")) as JObject;
+
+        if (!string.IsNullOrEmpty(manifestFilePath))
+        {
+            File.Copy(manifestFilePath, Path.ChangeExtension(manifestFilePath,".bac.json"));
+
+            var original = JToken.Parse(File.ReadAllText(manifestFilePath)) as JObject;
 
             manifest.Merge(original, new JsonMergeSettings
             {
@@ -81,11 +86,11 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
                 MergeNullValueHandling = MergeNullValueHandling.Ignore
             });
 
-            File.WriteAllText("manifest.json", manifest.ToString( Formatting.Indented));
+            File.WriteAllText(manifestFilePath, manifest.ToString( Formatting.Indented));
 
         }
 
-        var csprojct = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.csproj");
+        var csprojct = Directory.GetFiles(Path.GetDirectoryName(manifestFilePath), "*.csproj");
         if (csprojct.Length==1)
         {
             var proj = XDocument.Load(csprojct[0]);
