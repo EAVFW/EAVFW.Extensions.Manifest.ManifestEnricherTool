@@ -91,17 +91,26 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
         }
 
         var csprojct = Directory.GetFiles(Path.GetDirectoryName(manifestFilePath), "*.csproj");
+        console.WriteLine($"Found {csprojct.Length} projects for '{manifestFilePath}'");
         if (csprojct.Length==1)
         {
             var proj = XDocument.Load(csprojct[0]);
 
-            var itgs = proj.Root.Elements("ItemGroup").Where(ig => ig.Elements("PackageReference").Any()).ToArray();
-            var packages = itgs.SelectMany(ig => ig.Elements("PackageReference")).ToDictionary(k=>k.Attribute("Include"),v=>v.Attribute("Version"));
-            if (!packages.Any())
+            var clean_itemgroup_elements = proj.Root.Elements("ItemGroup").Where(ig => ig.Elements().All(n=>n.Name == "PackageReference") && !ig.Attributes("Condition").Any() ).ToArray();
+
+            console.WriteLine($"Found {clean_itemgroup_elements.Length} itemgroup elements with all packageReferences");
+
+            var with_packages = clean_itemgroup_elements.SelectMany(ig => ig.Elements("PackageReference"))
+                .Where(k => string.Equals(k.Attribute("Include").Value, id, System.StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            console.WriteLine($"Found {with_packages.Length}  package refrences for '{id}'");
+
+            if (!with_packages.Any())
             {
-                if (itgs.Any())
+                if (clean_itemgroup_elements.Any())
                 {
-                    itgs.FirstOrDefault().Add(new XElement("PackageReference", new XAttribute("Include",id), new XAttribute("Version",version)));
+                    clean_itemgroup_elements.FirstOrDefault().Add(new XElement("PackageReference", new XAttribute("Include",id), new XAttribute("Version",version)));
 
                    
                 }
@@ -110,6 +119,7 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
                     proj.Root.Add(new XElement("ItemGroup", new XElement("PackageReference", new XAttribute("Include", id), new XAttribute("Version", version))));
                 }
 
+                console.WriteLine($"Saving '{csprojct[0]}'");
                 proj.Save(csprojct[0]);
             }
 
