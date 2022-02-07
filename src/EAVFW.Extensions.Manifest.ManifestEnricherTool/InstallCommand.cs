@@ -63,7 +63,7 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
         var file = content.GetEntry("eavfw/manifest/manifest.extensions.json");
 
         using var extensions = new StreamReader(file.Open());
-        var manifest = JToken.ReadFrom(new JsonTextReader(extensions));
+        var manifest = JToken.ReadFrom(new JsonTextReader(extensions)) as JObject;
 
         console.WriteLine(manifest.ToString(Formatting.Indented));
 
@@ -73,14 +73,15 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
 
             var original = JToken.Parse(File.ReadAllText("manifest.json")) as JObject;
 
-            original.Merge(manifest, new JsonMergeSettings
+            manifest.Merge(original, new JsonMergeSettings
             {
                 // union array values together to avoid duplicates
                 MergeArrayHandling = MergeArrayHandling.Union,
-                PropertyNameComparison = System.StringComparison.OrdinalIgnoreCase
+                PropertyNameComparison = System.StringComparison.OrdinalIgnoreCase,
+                MergeNullValueHandling = MergeNullValueHandling.Ignore
             });
 
-            File.WriteAllText("manifest.json", original.ToString( Formatting.Indented));
+            File.WriteAllText("manifest.json", manifest.ToString( Formatting.Indented));
 
         }
 
