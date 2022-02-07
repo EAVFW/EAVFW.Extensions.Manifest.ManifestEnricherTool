@@ -103,8 +103,14 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
                 {
                     itgs.FirstOrDefault().Add(new XElement("PackageReference", new XAttribute("Include",id), new XAttribute("Version",version)));
 
-                    proj.Save(csprojct[0]);
+                   
                 }
+                else
+                {
+                    proj.Root.Add(new XElement("ItemGroup", new XElement("PackageReference", new XAttribute("Include", id), new XAttribute("Version", version))));
+                }
+
+                proj.Save(csprojct[0]);
             }
 
           
