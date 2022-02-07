@@ -24,6 +24,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                })
                .AddSingleton<App>();
 
+            serviceCollection.AddSingleton<Command, InstallCommand>();
+            serviceCollection.AddHttpClient();
             return serviceCollection;
         }
 

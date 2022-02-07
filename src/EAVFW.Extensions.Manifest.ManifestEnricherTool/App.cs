@@ -4,6 +4,7 @@
 // See https://aka.ms/new-console-template for more information
 using EAVFW.Extensions.Manifest.ManifestEnricherTool;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
@@ -21,11 +22,16 @@ public class App : RootCommand
 
 
 
-    public App(ILogger<App> logger) : base($"Generating Manifest: v{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion}")
+    public App(ILogger<App> logger, IEnumerable<Command> commands) : base($"Generating Manifest: v{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion}")
     {
         this.logger=logger;
-        Add(Path);
+        Path.IsRequired=true;
+       
+        Add(Path); 
         Add(Prefix);
+
+        foreach (var command in commands)
+            Add(command);
 
         Handler = CommandHandler.Create<ParseResult,IConsole>(Run);
     }
