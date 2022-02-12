@@ -74,7 +74,7 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
 
         if (!string.IsNullOrEmpty(manifestFilePath))
         {
-            File.Copy(manifestFilePath, Path.ChangeExtension(manifestFilePath,".bac.json"));
+            File.Copy(manifestFilePath, Path.ChangeExtension(manifestFilePath,$".{Directory.GetFiles(Path.GetDirectoryName(manifestFilePath), "*.bac.json").Count()}.bac.json"));
 
             var original = JToken.Parse(File.ReadAllText(manifestFilePath)) as JObject;
 
