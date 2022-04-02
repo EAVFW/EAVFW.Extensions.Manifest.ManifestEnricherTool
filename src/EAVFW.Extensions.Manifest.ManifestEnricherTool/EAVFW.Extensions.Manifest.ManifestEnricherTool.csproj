@@ -8,6 +8,8 @@
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>eavfw-manifest</ToolCommandName>
 
+		<PackageOutputPath>./../../artifacts</PackageOutputPath>
+
 		<Title>ManifestEnricherTool</Title>
 		<Authors>Poul Kjeldager</Authors>
 		<Description>A tool to enrich and transform manifest.json to manifest.g.json</Description>
@@ -20,9 +22,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="DotNetDevOps.Extensions.EAVFramework" Version="1.0.135" />
 		<PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.21" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="Semver" Version="2.1.0" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22103.3" />
 		<PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta3.22103.3" />
 	</ItemGroup>

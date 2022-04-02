@@ -2,6 +2,7 @@
 
 
 // See https://aka.ms/new-console-template for more information
+using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
@@ -25,6 +26,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                .AddSingleton<App>();
 
             serviceCollection.AddSingleton<Command, InstallCommand>();
+            serviceCollection.AddSingleton<Command, SQLCommand>();
             serviceCollection.AddHttpClient();
             return serviceCollection;
         }

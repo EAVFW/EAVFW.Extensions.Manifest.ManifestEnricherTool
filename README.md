@@ -4,7 +4,7 @@ A DotNET CLI tool for expanding and enriching manifest.json
 ### Install the tool locally
 
 1. Build the project in **Release**
-2. `dotnet tool install --add-source .\EAVFW.Extensions.Manifest.ManifestEnricherTool\nupkg EAVFW.Extensions.Manifest.ManifestEnricherTool`
+2. `dotnet tool install --add-source .\src\EAVFW.Extensions.Manifest.ManifestEnricherTool\nupkg EAVFW.Extensions.Manifest.ManifestEnricherTool`
 3. Activate the tool `dotnet eavfw-manifest`
 
 #### Update tool
