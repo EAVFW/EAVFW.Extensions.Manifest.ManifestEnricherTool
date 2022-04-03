@@ -42,7 +42,7 @@ jobs:
         run: echo ${env:RELEASE_VERSION}
 
       - name: Cleaning
-        run: dotnet clean
+        run: dotnet clean --configuration Release
 
       - name: Restore NuGet packages
         run: dotnet restore EAVFW.Extensions.Manifest.ManifestEnricherTool.sln
