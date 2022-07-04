@@ -41,7 +41,7 @@ public class InstallCommand : Command
         console.WriteLine("Installing :" + parseResult.GetValueForArgument(PackageName));
         var http = httpClientFactory.CreateClient();
 
-var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.json");
+        var result=await http.GetStringAsync($"https://api.nuget.org/v3/index.json");
         console.WriteLine(result);
 
         var services = JToken.Parse(result).SelectTokens("$.resources[?(@['@type']=='SearchQueryService')]['@id']");
@@ -54,8 +54,9 @@ var result=await        http.GetStringAsync($"https://api.nuget.org/v3/index.jso
         var version = package?.SelectToken("$.version")?.ToString();
         var id = package?.SelectToken("$.id")?.ToString();
 
-        var downlaodservice = JToken.Parse(result).SelectTokens("$.resources[?(@['@type']=='PackageBaseAddress/3.0.0')]['@id']"); 
-        var data = await http.GetByteArrayAsync($"{downlaodservice.FirstOrDefault()}{id}/{version}/{id}.{version}.nupkg");
+        var downlaodservice = JToken.Parse(result).SelectTokens("$.resources[?(@['@type']=='PackageBaseAddress/3.0.0')]['@id']");
+
+        var data = await http.GetByteArrayAsync($"{downlaodservice.FirstOrDefault()}{id}/{version}/{id}.{version}.nupkg".ToLowerInvariant());
         console.WriteLine(data?.Length.ToString()??"");
 
         using var content = new ZipArchive(new MemoryStream(data));
