@@ -21,6 +21,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         public Argument<string> ProjectPath = new Argument<string>("ProjectPath", "The project path to EAV Model Project");
         public Option<string> OutputFile = new Option<string>("OutputFile", "The output sql script for database migrations");
 
+        public Option<bool> ShouldGeneratePermissions = new Option<bool>("GeneratePermissions", "Should permissions be generated for each entity");
+        public Option<string> SystemUserEntity = new Option<string>("SystemUserEntity", "The system user entity used to popuplate a system administrator account");
+
         public SQLCommand() : base("sql", "generalte sql files")
         {
             ProjectPath.SetDefaultValue(".");
@@ -30,6 +33,13 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             OutputFile.AddAlias("-o");
             OutputFile.SetDefaultValue("obj/dbinit/init.sql");
             Add(OutputFile);
+
+
+            ShouldGeneratePermissions.SetDefaultValue(true);
+            Add(ShouldGeneratePermissions);
+
+            SystemUserEntity.SetDefaultValue("SystemUsers");
+            Add(SystemUserEntity);
 
             Handler = CommandHandler.Create<ParseResult, IConsole>(Run);
         }
@@ -73,15 +83,16 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             Directory.CreateDirectory(outputDirectory);
             await File.WriteAllTextAsync(outputFile, sql);
 
-            await InitializeSystemAdministrator(outputDirectory,model);
+            if(parseResult.GetValueForOption(ShouldGeneratePermissions))
+                await InitializeSystemAdministrator(parseResult, outputDirectory,model);
          }
 
        
-        public async Task InitializeSystemAdministrator(string outputDirectory, JToken model)
+        public async Task InitializeSystemAdministrator(ParseResult parseResult, string outputDirectory, JToken model)
         {
-            
+            var systemUserEntity = parseResult.GetValueForOption(SystemUserEntity);
             //TODO : Fix such this is only done if security package is installed.
-            
+
             var sb = new StringBuilder();
             var adminSGId = "$(SystemAdminSecurityGroupId)";
             sb.AppendLine("DECLARE @adminSRId uniqueidentifier");
@@ -92,9 +103,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[Identities] (Id, Name, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', 'System Administrator Group', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
             sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityGroups] (Id) VALUES('{adminSGId}')");
             sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[Identities] (Id, Name,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES ('$(UserGuid)', '$(UserName)', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[Users] (Id,Email) VALUES ('$(UserGuid)', '$(UserEmail)');");
-            //sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[Identities] (Id, Name,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES ('$(UserGuid)', '$(UserName)', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            //sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SystemUsers] (Id,Email,PrincipalName) VALUES ('$(UserGuid)', '$(UserEmail)', '$(UserPrincipalName)');");
+            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[{systemUserEntity}] (Id,Email) VALUES ('$(UserGuid)', '$(UserEmail)');");           
             sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityRoles] (Name, Description, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator', 'Access to all permissions', @adminSRId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
             sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityRoleAssignments] (IdentityId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', @adminSRId, '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
             sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityGroupMembers] (IdentityId, SecurityGroupId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('$(UserGuid)', '{adminSGId}', '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
