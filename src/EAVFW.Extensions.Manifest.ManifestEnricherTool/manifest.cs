@@ -55,11 +55,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             return args.Select((o, i) => new { label = o, value = i + 1 }).ToArray();
         }
 
-        public async Task<JsonDocument> LoadJsonDocumentAsync(FileStream fs, string customizationprefix, ILogger logger)
+        public async Task<JsonDocument> LoadJsonDocumentAsync(JToken jsonraw, string customizationprefix, ILogger logger)
         {
 
 
-            var jsonraw = Newtonsoft.Json.Linq.JToken.ReadFrom(new Newtonsoft.Json.JsonTextReader(new StreamReader(fs)));
+          
             var insertMerges = jsonraw.SelectToken("$.variables.options.insertMergeLayoutVariable")?.ToObject<string>();
 
             foreach (var entitieP in (jsonraw.SelectToken("$.entities") as JObject)?.Properties() ?? Enumerable.Empty<JProperty>())
@@ -271,6 +271,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 
                     switch (attr.SelectToken("$.type.type")?.ToString()?.ToLower())
                     {
+                        case "lookup" when string.IsNullOrEmpty(jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName")?.ToString()):
+                            throw new KeyNotFoundException($"The lookup entity does not exists: '{ attr["type"]["referenceType"]}'");
                         case "lookup":
 
                             attr["type"]["foreignKey"] = JToken.FromObject(new

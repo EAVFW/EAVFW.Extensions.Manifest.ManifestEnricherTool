@@ -4,11 +4,13 @@
 // See https://aka.ms/new-console-template for more information
 using EAVFW.Extensions.Manifest.ManifestEnricherTool;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -45,12 +47,27 @@ public class App : RootCommand
 
         var cmd = new ManifestCommand();
 
+      
+
+
         using (var fs = File.OpenRead(path))
         {
-            
 
+            var jsonraw = Newtonsoft.Json.Linq.JToken.ReadFrom(new Newtonsoft.Json.JsonTextReader(new StreamReader(fs))) as JObject;
+            var others = Directory.GetFiles(System.IO.Path.GetDirectoryName(path), "manifest.*.json")
+          .Where(c => !string.Equals("manifest.schema.json", System.IO.Path.GetFileName(c), System.StringComparison.OrdinalIgnoreCase));
+            foreach (var other in others)
+            {
+                jsonraw.Merge(JToken.Parse(File.ReadAllText(other)), new JsonMergeSettings
+                {
+                    // union array values together to avoid duplicates
+                    MergeArrayHandling = MergeArrayHandling.Union,
+                    PropertyNameComparison = System.StringComparison.OrdinalIgnoreCase,
+                    MergeNullValueHandling = MergeNullValueHandling.Ignore
+                });
+            }
 
-            JsonDocument json = await cmd.LoadJsonDocumentAsync(fs, customizationprefix, logger);
+            JsonDocument json = await cmd.LoadJsonDocumentAsync(jsonraw, customizationprefix, logger);
         }
 
 
