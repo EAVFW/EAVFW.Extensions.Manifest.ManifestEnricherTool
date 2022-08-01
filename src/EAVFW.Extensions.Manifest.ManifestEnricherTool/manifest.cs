@@ -471,6 +471,24 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             }
 
 
+            //Lets sort them according to TPT
+            var qque = new Queue<JProperty>(jsonraw.SelectToken("$.entities").OfType<JProperty>());
+
+            while(qque.Count > 0)
+            {
+                var entity = qque.Dequeue();
+
+                var tpt = entity.Value.SelectToken("$.TPT")?.ToString();
+                if (!string.IsNullOrEmpty(tpt))
+                {
+                    var baseentity = jsonraw.SelectToken($"$.entities['{tpt}']").Parent as JProperty;
+                    entity.Remove();
+                    baseentity.AddAfterSelf(entity);
+                     
+
+                }
+            }
+
 
             var json = JsonDocument.Parse(jsonraw.ToString(), new JsonDocumentOptions
             {
