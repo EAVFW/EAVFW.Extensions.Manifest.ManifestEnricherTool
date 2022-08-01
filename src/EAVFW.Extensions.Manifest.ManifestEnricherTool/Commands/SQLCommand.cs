@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
+
+
     public class SQLCommand : Command
     {
         public Argument<string> ProjectPath = new Argument<string>("ProjectPath", "The project path to EAV Model Project");

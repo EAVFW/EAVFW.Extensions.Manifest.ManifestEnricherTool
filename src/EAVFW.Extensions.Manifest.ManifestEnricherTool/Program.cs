@@ -27,6 +27,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 
             serviceCollection.AddSingleton<Command, InstallCommand>();
             serviceCollection.AddSingleton<Command, SQLCommand>();
+            serviceCollection.AddSingleton<Command, ManifestCommand>();
             serviceCollection.AddHttpClient();
             return serviceCollection;
         }
@@ -34,9 +35,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
         public static async Task<int> Main(string[] args)
         {
 
-            var services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
+            using var services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
 
-            return await services.GetRequiredService<App>().InvokeAsync(args);
+            var result = await services.GetRequiredService<App>().InvokeAsync(args);
+
+            return result;
         }
 
     }

@@ -28,6 +28,8 @@
 	<ItemGroup>
 	 
 		<PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.21" />
+	 
+		<PackageReference Include="LibGit2Sharp" Version="0.26.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Semver" Version="2.1.0" />
@@ -38,8 +40,7 @@
 
 	<ItemGroup Condition="$(RemoteEAVFramework) == 'false'">
 
-		<ProjectReference
-                                  Include="$(LocalEAVFrameworkPath)\src\DotNetDevOps.Extensions.EAVFramework.csproj" />
+		<ProjectReference Include="$(LocalEAVFrameworkPath)\src\DotNetDevOps.Extensions.EAVFramework.csproj" />
 
 	</ItemGroup>
 

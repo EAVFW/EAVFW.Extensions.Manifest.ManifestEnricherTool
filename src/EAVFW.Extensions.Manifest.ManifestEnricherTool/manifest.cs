@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 {
 
-    public partial class ManifestCommand
+    public partial class RootCommand
     {
 
         public string Path { get; set; } = Directory.GetCurrentDirectory();

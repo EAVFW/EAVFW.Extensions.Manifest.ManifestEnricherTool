@@ -15,7 +15,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-public class App : RootCommand
+public class App : System.CommandLine.RootCommand
 {
     public Option<string> Path = new Option<string>("--path", "The path");
     public Option<string> Prefix = new Option<string>(new string[] { "--customizationprefix" }, "The prefix");
@@ -45,7 +45,7 @@ public class App : RootCommand
 
         console.Out.Write($"Generating Manifest: v{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion}");
 
-        var cmd = new ManifestCommand();
+        var cmd = new EAVFW.Extensions.Manifest.ManifestEnricherTool.RootCommand();
 
       
 
