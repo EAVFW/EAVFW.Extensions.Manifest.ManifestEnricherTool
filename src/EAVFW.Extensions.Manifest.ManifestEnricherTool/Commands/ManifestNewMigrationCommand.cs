@@ -69,14 +69,16 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             }
 
             var file = files.Single();
-            var manifest = JToken.Parse(File.ReadAllText(file));
-            var version = manifest.SelectToken("$.version");
-            File.Copy(file, $"{Path.GetDirectoryName(file)}/../manifests/manifest.{version}.g.json");
+            var manifest_gen = JToken.Parse(File.ReadAllText(file));
+            var version_gen = manifest_gen.SelectToken("$.version");
+            File.Copy(file, $"{Path.GetDirectoryName(file)}/../manifests/manifest.{version_gen}.g.json");
 
-            var semversion = Semver.SemVersion.Parse(version.ToString(), Semver.SemVersionStyles.Strict);
+            var semversion = Semver.SemVersion.Parse(version_gen.ToString(), Semver.SemVersionStyles.Strict);
 
+            var manifst = JToken.Parse($"{Path.GetDirectoryName(file)}/../manifest.json");
+            var version = manifst.SelectToken("$.version");
             version.Replace(semversion.WithPatch(semversion.Patch + 1).ToString());
-            File.WriteAllText(file, manifest.ToString(Formatting.Indented));
+            File.WriteAllText($"{Path.GetDirectoryName(file)}/../manifest.json", manifst.ToString(Formatting.Indented));
 
             var name = SubModelName.GetValue(parseResult);
             if (!string.IsNullOrEmpty(name))
