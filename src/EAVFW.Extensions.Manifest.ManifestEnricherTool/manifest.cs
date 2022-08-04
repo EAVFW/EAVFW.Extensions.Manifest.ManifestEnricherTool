@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 {
 
-    public partial class ManifestCommand
+    public partial class RootCommand
     {
 
         public string Path { get; set; } = Directory.GetCurrentDirectory();
@@ -55,11 +55,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             return args.Select((o, i) => new { label = o, value = i + 1 }).ToArray();
         }
 
-        public async Task<JsonDocument> LoadJsonDocumentAsync(FileStream fs, string customizationprefix, ILogger logger)
+        public async Task<JsonDocument> LoadJsonDocumentAsync(JToken jsonraw, string customizationprefix, ILogger logger)
         {
 
 
-            var jsonraw = Newtonsoft.Json.Linq.JToken.ReadFrom(new Newtonsoft.Json.JsonTextReader(new StreamReader(fs)));
+          
             var insertMerges = jsonraw.SelectToken("$.variables.options.insertMergeLayoutVariable")?.ToObject<string>();
 
             foreach (var entitieP in (jsonraw.SelectToken("$.entities") as JObject)?.Properties() ?? Enumerable.Empty<JProperty>())
@@ -271,6 +271,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 
                     switch (attr.SelectToken("$.type.type")?.ToString()?.ToLower())
                     {
+                        case "lookup" when string.IsNullOrEmpty(jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName")?.ToString()):
+                            throw new KeyNotFoundException($"The lookup entity does not exists: '{ attr["type"]["referenceType"]}'");
                         case "lookup":
 
                             attr["type"]["foreignKey"] = JToken.FromObject(new
@@ -468,6 +470,24 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 
             }
 
+
+            //Lets sort them according to TPT
+            var qque = new Queue<JProperty>(jsonraw.SelectToken("$.entities").OfType<JProperty>());
+
+            while(qque.Count > 0)
+            {
+                var entity = qque.Dequeue();
+
+                var tpt = entity.Value.SelectToken("$.TPT")?.ToString();
+                if (!string.IsNullOrEmpty(tpt))
+                {
+                    var baseentity = jsonraw.SelectToken($"$.entities['{tpt}']").Parent as JProperty;
+                    entity.Remove();
+                    baseentity.AddAfterSelf(entity);
+                     
+
+                }
+            }
 
 
             var json = JsonDocument.Parse(jsonraw.ToString(), new JsonDocumentOptions
