@@ -70,7 +70,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                      Manifests = new[] { model }.Concat(models).ToArray(),
                      PublisherPrefix = schema,
                      EnableDynamicMigrations = true,
-                     Namespace = "KFST.Vanddata.Models",
+                     Namespace = "EAVFW.Extensions.Manifest",
                     // DTOAssembly = typeof(ApplicationExtensions).Assembly,
                     // DTOBaseClasses = new[] { typeof(BaseOwnerEntity<Model.Identity>), typeof(BaseIdEntity<Model.Identity>), typeof(KeyValueEntity<Model.Identity>) }
                  }),
