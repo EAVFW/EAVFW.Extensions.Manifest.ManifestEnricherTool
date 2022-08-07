@@ -47,12 +47,14 @@ public class InstallCommand : Command
         var services = JToken.Parse(result).SelectTokens("$.resources[?(@['@type']=='SearchQueryService')]['@id']");
         console.WriteLine(string.Join(",",services));
 
-        var searches = JToken.Parse(await http.GetStringAsync($"{services.FirstOrDefault()}?q={packageName}&skip={0}&take={10}&prerelease={false}{(string.IsNullOrEmpty(packageVersion) ? "" : $"&semVerLevel={packageVersion}")}"));
+        var searches = JToken.Parse(await http.GetStringAsync($"{services.FirstOrDefault()}?q={packageName}&skip={0}&take={10}&prerelease={false}&semVerLevel=2.0.0"));
 
         console.WriteLine(searches.ToString(Newtonsoft.Json.Formatting.Indented));
         var package = searches.SelectToken("$.data[0]");
         var version = package?.SelectToken("$.version")?.ToString();
         var id = package?.SelectToken("$.id")?.ToString();
+
+
 
         var downlaodservice = JToken.Parse(result).SelectTokens("$.resources[?(@['@type']=='PackageBaseAddress/3.0.0')]['@id']");
 
