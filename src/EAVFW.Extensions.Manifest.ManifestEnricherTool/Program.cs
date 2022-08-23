@@ -3,6 +3,7 @@
 
 // See https://aka.ms/new-console-template for more information
 using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands;
+using EAVFW.Extensions.Manifest.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
@@ -23,6 +24,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                    configure.AddDebug();
                    configure.AddConsole();
                })
+               .AddManifestEnricher()
                .AddSingleton<App>();
 
             serviceCollection.AddSingleton<Command, InstallCommand>();

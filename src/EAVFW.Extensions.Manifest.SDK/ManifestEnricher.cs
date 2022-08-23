@@ -1,4 +1,5 @@
 ﻿using DotNETDevOps.JsonFunctions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
@@ -6,26 +7,39 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
+namespace EAVFW.Extensions.Manifest.SDK
 {
-
-    public partial class RootCommand
+    public static class ServiceRegistrationExtension
     {
-
-        public string Path { get; set; } = Directory.GetCurrentDirectory();
-
-        private static string? ToSchemaName(string? displayName)
+        public static IServiceCollection AddManifestEnricher(this IServiceCollection services)
         {
-            return displayName?.Replace(" ", "").Replace(":", "_").Replace("/", "or").Replace("-", "").Replace("(", "").Replace(")", ""); ;
+            services.AddTransient<ISchemaNameManager, DefaultSchemaNameManager>();
+            services.AddTransient<IManifestReplacmentRunner, DefaultManifestReplacementRunner>();
+            services.AddTransient<IManifestPathExtracter, DefaultManifestPathExtracter>();           
+            services.AddTransient<IManifestEnricher, ManifestEnricher>();
+
+            services.AddOptions<ManifestEnricherOptions>();
+
+            return services;
+        }
+    }
+    public class ManifestEnricher : IManifestEnricher
+    {
+        private readonly ISchemaNameManager schemaName;
+        private readonly IManifestReplacmentRunner manifestReplacmentRunner;
+
+        public ManifestEnricher(ISchemaNameManager schemaName, IManifestReplacmentRunner manifestReplacmentRunner)
+        {
+            this.schemaName = schemaName ?? throw new System.ArgumentNullException(nameof(schemaName));
+            this.manifestReplacmentRunner = manifestReplacmentRunner ?? throw new ArgumentNullException(nameof(manifestReplacmentRunner));
         }
 
-        private JObject Merge(JObject jToken, object obj)
+        protected virtual JObject Merge(JObject jToken, object obj)
         {
-          
+
             jToken = (JObject)jToken.DeepClone();
 
 
@@ -38,11 +52,15 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             }
 
             if (!jToken.ContainsKey("schemaName"))
-                jToken["schemaName"] = ToSchemaName(jToken.SelectToken("$.displayName")?.ToString());
+                jToken["schemaName"] = schemaName.ToSchemaName(jToken.SelectToken("$.displayName")?.ToString());
             if (!jToken.ContainsKey("logicalName"))
                 jToken["logicalName"] = jToken.SelectToken("$.schemaName")?.ToString().ToLower();
 
             return jToken as JObject;
+        }
+        private object[] CreateOptions(params string[] args)
+        {
+            return args.Select((o, i) => new { label = o, value = i + 1 }).ToArray();
         }
         private JObject CreateAttribute(JObject attr, string displayName, object type, string? schemaName = null, object? additionalProps = null)
         {
@@ -50,16 +68,21 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                 return Merge(Merge(attr, new { displayName, type, schemaName }), additionalProps);
             return Merge(attr, new { displayName, type, schemaName });
         }
-        private object[] CreateOptions(params string[] args)
+        private string TrimId(string v)
         {
-            return args.Select((o, i) => new { label = o, value = i + 1 }).ToArray();
-        }
+            if (string.IsNullOrEmpty(v))
+                return v;
 
+            if (v.EndsWith("id", StringComparison.OrdinalIgnoreCase))
+                return v.Substring(0, v.Length - 2);
+
+            return v;
+        }
         public async Task<JsonDocument> LoadJsonDocumentAsync(JToken jsonraw, string customizationprefix, ILogger logger)
         {
 
 
-          
+
             var insertMerges = jsonraw.SelectToken("$.variables.options.insertMergeLayoutVariable")?.ToObject<string>();
 
             foreach (var entitieP in (jsonraw.SelectToken("$.entities") as JObject)?.Properties() ?? Enumerable.Empty<JProperty>())
@@ -74,7 +97,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                     entity["logicalName"] = entity.SelectToken("$.schemaName")?.ToString().ToLower();
 
                 if (!entity.ContainsKey("collectionSchemaName"))
-                    entity["collectionSchemaName"] = ToSchemaName(entity["pluralName"]?.ToString());
+                    entity["collectionSchemaName"] = schemaName.ToSchemaName(entity["pluralName"]?.ToString());
 
                 JObject SetDefault(JToken obj, JObject localeEnglish)
                 {
@@ -108,11 +131,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                     {
                         if (attr.Name == "[merge()]")
                         {
-                            await RunReplacements(jsonraw, customizationprefix,logger, attr);
+                            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr);
                         }
                         else if (attr.Value.Type == JTokenType.String)
                         {
-                            await RunReplacements(jsonraw, customizationprefix,logger, attr.Value);
+                            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr.Value);
                         }
                     }
 
@@ -123,7 +146,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                         if (!string.IsNullOrEmpty(insertMerges))
                         {
                             var value = attribute.Value as JObject;
-                            if (!value?.ContainsKey("[merge()]")??false)
+                            if (!value?.ContainsKey("[merge()]") ?? false)
                                 value.Add(new JProperty("[merge()]", $"[variables('{insertMerges}')]"));
                             queue.Enqueue(value);
                         }
@@ -153,10 +176,10 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                                 options=CreateOptions("Bill To","Ship To","Primary","Other")
                             } }),
                             Merge(attr,new { displayName=$"{displayName}: City", type="string"}),
-                            Merge(attr,new { displayName=$"{displayName}: Country", type="string", schemaName=ToSchemaName( $"{displayName}: Country")}),
+                            Merge(attr,new { displayName=$"{displayName}: Country", type="string", schemaName=schemaName.ToSchemaName( $"{displayName}: Country")}),
                             Merge(attr,new { displayName=$"{displayName}: County", type="string"}),
                             Merge(attr,new { displayName=$"{displayName}: Fax", type="string"}),
-                            Merge(attr,new { displayName=$"{displayName}: Freight Terms", schemaName=ToSchemaName( $"{displayName}: Freight Terms Code"), type=new { type="picklist",
+                            Merge(attr,new { displayName=$"{displayName}: Freight Terms", schemaName=schemaName.ToSchemaName( $"{displayName}: Freight Terms Code"), type=new { type="picklist",
                                 isGlobal=false,
                                 name=$"{displayName}: Freight Terms",
                                 options=CreateOptions("FOB","No Charge")
@@ -165,23 +188,23 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                             CreateAttribute(attr,$"{displayName}: Latitude","float"),
                             CreateAttribute(attr,$"{displayName}: Longitude","float"),
                             CreateAttribute(attr,$"{displayName}: Name","string",null, new { isPrimaryField = !attributes.Properties().Any(p=>p.Value.SelectToken("$.isPrimaryField") != null) }),
-                            CreateAttribute(attr,$"{displayName}: Phone","phone", ToSchemaName( $"{displayName}: Telephone 1")),
-                            CreateAttribute(attr,$"{displayName}: Telephone 2","phone", ToSchemaName( $"{displayName}: Telephone 2")),
-                            CreateAttribute(attr,$"{displayName}: Telephone 3","phone", ToSchemaName( $"{displayName}: Telephone 3")),
+                            CreateAttribute(attr,$"{displayName}: Phone","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 1")),
+                            CreateAttribute(attr,$"{displayName}: Telephone 2","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 2")),
+                            CreateAttribute(attr,$"{displayName}: Telephone 3","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 3")),
                             CreateAttribute(attr,$"{displayName}: Post Office Box","string"),
                             CreateAttribute(attr,$"{displayName}: Primary Contact Name","string"),
                             CreateAttribute(attr,$"{displayName}: Shipping Method",new { type="picklist",
                                 isGlobal=false,
                                 name=$"{displayName}: Shipping Method",
                                 options=CreateOptions("Airborne","DHL","FedEx","UPS","Postal Mail","Full Load","Will Call"),
-                            }, ToSchemaName( $"{displayName}: Shipping Method Code")),
+                            }, schemaName.ToSchemaName( $"{displayName}: Shipping Method Code")),
                             CreateAttribute(attr,$"{displayName}: State/Province","string"),
-                            CreateAttribute(attr,$"{displayName}: Street 1","string",ToSchemaName( $"{displayName}: line1")),
-                            CreateAttribute(attr,$"{displayName}: Street 2","string",ToSchemaName( $"{displayName}: line2")),
-                            CreateAttribute(attr,$"{displayName}: Street 3","string",ToSchemaName( $"{displayName}: line3")),
+                            CreateAttribute(attr,$"{displayName}: Street 1","string",schemaName.ToSchemaName( $"{displayName}: line1")),
+                            CreateAttribute(attr,$"{displayName}: Street 2","string",schemaName.ToSchemaName( $"{displayName}: line2")),
+                            CreateAttribute(attr,$"{displayName}: Street 3","string",schemaName.ToSchemaName( $"{displayName}: line3")),
                             CreateAttribute(attr,$"{displayName}: UPS Zone","string"),
                             CreateAttribute(attr,$"{displayName}: UTC Offset","timezone"),
-                            CreateAttribute(attr,$"{displayName}: ZIP/Postal Code","string",ToSchemaName( $"{displayName}: Postal Code")),
+                            CreateAttribute(attr,$"{displayName}: ZIP/Postal Code","string",schemaName.ToSchemaName( $"{displayName}: Postal Code")),
                             CreateAttribute(attr,$"{displayName}: State/Province","string"),
 
                         };
@@ -207,16 +230,16 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                         if (!attr.ContainsKey("schemaName"))
                         {
 
-                            attr["schemaName"] = ToSchemaName(attr.SelectToken("$.displayName").ToString());
+                            attr["schemaName"] = schemaName.ToSchemaName(attr.SelectToken("$.displayName").ToString());
 
-                            await RunReplacements(jsonraw, customizationprefix, logger,attr);
+                            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr);
 
                             switch (attr.SelectToken("$.type.type")?.ToString()?.ToLower())
                             {
                                 case "lookup":
                                 case "customer":
                                     if (!attr["schemaName"].ToString().EndsWith("Id"))
-                                        attr["schemaName"] = $"{ToSchemaName(attr.SelectToken("$.displayName").ToString())}Id";
+                                        attr["schemaName"] = $"{schemaName.ToSchemaName(attr.SelectToken("$.displayName").ToString())}Id";
 
 
 
@@ -258,7 +281,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             }
 
 
-            await RunReplacements(jsonraw, customizationprefix,logger);
+            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger);
 
 
             foreach (var entitieP in (jsonraw.SelectToken("$.entities") as JObject)?.Properties() ?? Enumerable.Empty<JProperty>())
@@ -271,19 +294,19 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 
                     switch (attr.SelectToken("$.type.type")?.ToString()?.ToLower())
                     {
-                        case "lookup" when string.IsNullOrEmpty(jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName")?.ToString()):
-                            throw new KeyNotFoundException($"The lookup entity does not exists: '{ attr["type"]["referenceType"]}'");
+                        case "lookup" when string.IsNullOrEmpty(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].logicalName")?.ToString()):
+                            throw new KeyNotFoundException($"The lookup entity does not exists: '{attr["type"]["referenceType"]}'");
                         case "lookup":
 
                             attr["type"]["foreignKey"] = JToken.FromObject(new
                             {
-                                principalTable = jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString(),
-                                principalColumn = jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].attributes").OfType<JProperty>()
-                                    .Concat(jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].TPT") }'].attributes").OfType<JProperty>())
+                                principalTable = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].logicalName").ToString(),
+                                principalColumn = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].attributes").OfType<JProperty>()
+                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}'].attributes").OfType<JProperty>())
                                     .GroupBy(k => k.Name).Select(g => g.First())
                                     .Single(a => a.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false).Value.SelectToken("$.logicalName").ToString(),
-                                principalNameColumn = jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].attributes").OfType<JProperty>()
-                                    .Concat(jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].TPT") }'].attributes").OfType<JProperty>())
+                                principalNameColumn = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].attributes").OfType<JProperty>()
+                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}'].attributes").OfType<JProperty>())
                                     .GroupBy(k => k.Name).Select(g => g.First())
                                     .Single(a => a.Value.SelectToken("$.isPrimaryField")?.ToObject<bool>() ?? false).Value.SelectToken("$.logicalName").ToString(),
                                 name = TrimId(attr.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
@@ -390,7 +413,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                 }
             }
 
-            await RunReplacements(jsonraw, customizationprefix,logger);
+            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger);
 
 
             foreach (var (entityDefinition, attributeDefinition2) in jsonraw.SelectToken("$.entities").OfType<JProperty>()
@@ -430,7 +453,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                            [entityDefinition.Name] = new
                            {
                                displayName = entityDefinition.Value.SelectToken("$.displayName"),
-                               logicalName = entityDefinition.Value.SelectToken("$.logicalName")+"id",
+                               logicalName = entityDefinition.Value.SelectToken("$.logicalName") + "id",
                                schemaName = entityDefinition.Value.SelectToken("$.schemaName") + "Id",
                                type = new
                                {
@@ -438,12 +461,12 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                                    referenceType = entityDefinition.Name,
                                },
                            },
-                           [nentity+" Value"] = new
+                           [nentity + " Value"] = new
                            {
 
-                               displayName = nentity+" Value",
+                               displayName = nentity + " Value",
                                logicalName = $"{attributeDefinition2.Value.SelectToken("$.type.name")}".Replace(" ", "").ToLower(),
-                               schemaName = $"{attributeDefinition2.Value.SelectToken("$.type.name")}".Replace(" ", "") +"Value",
+                               schemaName = $"{attributeDefinition2.Value.SelectToken("$.type.name")}".Replace(" ", "") + "Value",
                                //   isPrimaryKey = true,
                                type = new
                                {
@@ -474,7 +497,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             //Lets sort them according to TPT
             var qque = new Queue<JProperty>(jsonraw.SelectToken("$.entities").OfType<JProperty>());
 
-            while(qque.Count > 0)
+            while (qque.Count > 0)
             {
                 var entity = qque.Dequeue();
 
@@ -484,7 +507,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                     var baseentity = jsonraw.SelectToken($"$.entities['{tpt}']").Parent as JProperty;
                     entity.Remove();
                     baseentity.AddAfterSelf(entity);
-                     
+
 
                 }
             }
@@ -597,7 +620,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                         type = JToken.FromObject(new
                         {
                             type = "integer",
-                            @enum = attrType.SelectToken("$.options").OfType<JProperty>().Select(c => c.Value.Type== JTokenType.Object ? c.Value.SelectToken("$.value") : c.Value).Select(v => v.ToObject<int>())
+                            @enum = attrType.SelectToken("$.options").OfType<JProperty>().Select(c => c.Value.Type == JTokenType.Object ? c.Value.SelectToken("$.value") : c.Value).Select(v => v.ToObject<int>())
                         });
                         return true;
                     default:
@@ -654,289 +677,5 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             return json;
         }
 
-        private string TrimId(string v)
-        {
-            if (string.IsNullOrEmpty(v))
-                return v;
-
-            if (v.EndsWith("id", StringComparison.OrdinalIgnoreCase))
-                return v.Substring(0, v.Length - 2);
-
-            return v;
-        }
-
-        private async Task RunReplacements(JToken jsonraw, string customizationprefix, ILogger logger, JToken elementToRunReplacementFor = null)
-        {
-            var entityPath = string.Empty;
-            var attributePath = string.Empty;
-            JToken currentElement = null;
-            JToken localelement = null;
-            JToken[] localarguments = null;
-
-            var q = new Queue<JToken>(new[] { elementToRunReplacementFor ?? jsonraw });
-
-
-            var expressionParser = new ExpressionParser<Newtonsoft.Json.Linq.JToken>(
-                Options.Create(new ExpressionParserOptions<Newtonsoft.Json.Linq.JToken>() { Document = jsonraw, ThrowOnError = true }), logger,
-                new DefaultExpressionFunctionFactory<Newtonsoft.Json.Linq.JToken>()
-                {
-                    Functions =
-                    {
-                        ["data"] = (parser,Document,arguments) => {Console.WriteLine(arguments[0]); var child=JToken.Parse(File.ReadAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path) ,arguments[0]?.ToString())));// q.Enqueue(child);
-                                                                                                                                                                                                                                      return Task.FromResult<JToken>(child); },
-                        ["customizationprefix"] =(parser,Document,arguments) => Task.FromResult<JToken>(customizationprefix),
-                        ["propertyNames"] = (parser,document,arguments) => Task.FromResult<JToken>((arguments[0] is JObject obj ? JToken.FromObject( obj.Properties().Select(k=>k.Name)):new JArray())),
-                        ["indexOf"] =(parser,document,arguments) => Task.FromResult<JToken>(Array.IndexOf( arguments[0].ToArray(),arguments[1])),
-                        ["default"] = (parser,document,arguments) => Task.FromResult(arguments[0] == null || arguments[0].Type == JTokenType.Null ? arguments[1]:arguments[0]),
-                        ["unfoldsource"] = (parser,document,arguments)=>  Task.FromResult(document.SelectToken(arguments[0]["__unroll__path"].ToString())),
-                        ["if"] = (parser,document,arguments) => Task.FromResult(arguments[0].ToObject<bool>() ? arguments[1]:arguments[2]),
-                        ["condition"] = (parser,document,arguments) => Task.FromResult(arguments[0].ToObject<bool>() ? arguments[1]:arguments[2]),
-                        ["in"] =(parser,document,arguments) => Task.FromResult(JToken.FromObject( arguments[1] != null && ( arguments[1] is JObject obj ? obj.ContainsKey(arguments[0].ToString()) :  arguments[1].Any(a=>arguments[0].Equals(a)))  )),
-                        ["variables"] = (parser,document,arguments)=> { localarguments= arguments;  return Task.FromResult(jsonraw.SelectToken($"$.variables.{arguments.First()}")?.DeepClone()); },
-                        ["concat"] = (parser,document,arguments)=>Task.FromResult<JToken>(string.Join("",arguments.Select(k=>k.ToString())) ),
-                        ["entity"] = (parser, document, arguments) =>
-                        {
-                            var entity = document.SelectToken(entityPath);
-
-                            return Task.FromResult<JToken>(entity);
-                        },
-                        ["toLogicalName"] = (parser,document,arguments) => Task.FromResult<JToken>(ToSchemaName(arguments[0].ToString()).ToLower()),
-                        ["attribute"] = (parser, document, arguments) => Task.FromResult(document.SelectToken(attributePath)),
-                        ["attributes"] = (parser, document, arguments) => Task.FromResult(document.SelectToken(entityPath+".attributes")),
-                        ["select"] = (parser, document, arguments) => Task.FromResult(arguments.FirstOrDefault(a=>!(a== null || a.Type == JTokenType.Null))),
-                        ["propertyName"] = (parser, document, arguments) => Task.FromResult<JToken>( arguments[0].Parent is JProperty prop ? prop.Name : null),
-                        ["parent"] =(parser, document, arguments) => Task.FromResult<JToken>(  arguments.Any() ?  (arguments[0].Parent is JProperty prop ? prop.Parent:arguments[0].Parent)  :  (currentElement.Parent is JProperty prop1 ? prop1.Parent:currentElement.Parent)),
-                        ["element"]=(parser,document,arguments)=>Task.FromResult(localelement ?? currentElement),
-                        ["map"] =async (parser, document, arguments) =>{
-
-                            return JToken.FromObject( await Task.WhenAll( arguments[0].Select(a=>{
-
-                            localelement = a;
-
-                            return parser.EvaluateAsync(arguments[1].ToString());
-
-
-                            })));
-
-                            }
-
-
-                    }
-                });
-
-            while (q.Count > 0)
-            {
-
-                var a = q.Dequeue();
-                if (a == null)
-                    continue;
-
-                entityPath = ExtractPath(a, "entities");
-                attributePath = ExtractPath(a, "attributes") ?? ExtractPath(a, "columns");
-
-                try
-                {
-                    if (a is JProperty prop)
-                    {
-                        var value = prop.Value;
-                        var str = prop.Name;
-
-                        if (ShouldEvaluate(str))
-                        {
-
-                            if (str == "[merge()]")
-                            {
-                                var parentObj = prop.Parent as JObject;
-                                var obj = prop.Value;
-
-                                if (obj.Type == JTokenType.String && ShouldEvaluate(obj.ToString()))
-                                {
-                                    currentElement = obj;
-                                    obj = await EvaluateAsync(expressionParser, obj.ToString());
-                                }
-
-                                foreach (var childProp in (obj as JObject).Properties().ToArray())
-                                {
-
-                                    childProp.Remove();
-                                    parentObj.Add(childProp);
-                                    // parentObj.Add(childProp.Name, childProp.Value);
-                                    q.Enqueue(childProp);
-                                }
-
-                                prop.Remove();
-                                continue;
-                            }
-                            currentElement = prop.Value;
-                            var nToken = await EvaluateAsync(expressionParser, str);
-
-
-
-                            if (nToken.Type == JTokenType.Null || nToken.Type == JTokenType.Undefined)
-                            {
-                                prop.Remove();
-                                continue;
-                            }
-
-
-
-                            var nProp = new JProperty(nToken.ToString(), value);
-                            prop.Replace(nProp);
-                            q.Enqueue(nProp);
-                        }
-                        else
-                        {
-
-
-                            q.Enqueue(value);
-                        }
-                    }
-                    else if (a is JObject obj)
-                    {
-                        foreach (var p in obj.Properties())
-                        {
-
-                            q.Enqueue(p);
-
-
-                        }
-
-                    }
-                    else if (a is JArray array)
-                    {
-                        foreach (var element in array)
-                            q.Enqueue(element);
-
-                    }
-                    else if (a.Type == JTokenType.String)
-                    {
-                        var str = a.ToString();
-
-                        if (ShouldEvaluate(str))
-                        {
-                            currentElement = a;
-                            var t = await EvaluateAsync(expressionParser, str);
-
-                            a.Replace(t);
-                            q.Enqueue(t);
-                        }
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"{entityPath}| {attributePath}");
-                    throw;
-                }
-            }
-        }
-
-        private static async Task<JToken> EvaluateAsync(ExpressionParser<JToken> expressionParser, string str)
-        {
-            try
-            {
-                var nToken = await expressionParser.EvaluateAsync(str);
-
-                if (nToken == null)
-                {
-                    return nToken;
-                }
-
-
-
-                if (nToken.Type == JTokenType.Object)
-                {
-                    var q = new Queue<JToken>();
-                    q.Enqueue(nToken);
-                    while (q.Count > 0)
-                    {
-                        var c = q.Dequeue();
-                        if (c is JObject o)
-                        {
-                            foreach (var p in o.Properties())
-                                q.Enqueue(p);
-
-                        }
-                        else if (c is JProperty p)
-                        {
-                            if (p.Name.StartsWith("[["))
-                            {
-                                var nprop = new JProperty(p.Name.Substring(1, p.Name.Length - 2), p.Value);
-                                p.Replace(nprop);
-                                q.Enqueue(nprop);
-                            }
-                            else
-                            {
-                                q.Enqueue(p.Value);
-                            }
-                        }
-                        else if (c is JArray a)
-                        {
-                            foreach (var e in a)
-                                q.Enqueue(e);
-                        }
-                        else if (c.Type == JTokenType.String && c.ToString().StartsWith("[["))
-                        {
-                            //  var ch = await expressionParser.EvaluateAsync(c.ToString().Substring(1, c.ToString().Length - 2));
-                            //  c.Replace(ch);
-                            //  q.Enqueue(ch);
-                            var child = c.ToString().Substring(1, c.ToString().Length - 2);
-                            // var childToken = await EvaluateAsync(expressionParser, child);
-                            c.Replace(child);
-                        }
-                    }
-                }
-
-
-
-                while (nToken.Type == JTokenType.String && ShouldEvaluate(nToken.ToString().Substring(1, nToken.ToString().Length - 2)))
-                {
-                    nToken = await expressionParser.EvaluateAsync(nToken.ToString().Substring(1, nToken.ToString().Length - 2));
-                }
-
-
-
-                return nToken;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("EvaluateAsync");
-                throw;
-            }
-        }
-
-        private static bool ShouldEvaluate(string str)
-        {
-            return str.StartsWith("[") && str.EndsWith("]") && !str.StartsWith("[[");
-        }
-
-        private static string ExtractPath(JToken token, string part)
-        {
-            string partPath;
-            if (token.Path.Contains(part) && !token.Path.EndsWith(part))
-            {
-
-                var idx = token.Path.IndexOf(part) + part.Length + 1;
-
-                partPath = new string(token.Path.TakeWhile((c, i) => i < idx || !(c == '.' || c == ']')).ToArray());
-
-                if (partPath.EndsWith('\''))
-                    partPath += ']';
-
-            }
-            else
-            {
-                partPath = string.Empty;
-
-            }
-            if (partPath.EndsWith("[merge()]"))
-            {
-                partPath = partPath.Replace("[merge()]", "");
-            }
-            return string.IsNullOrEmpty(partPath) ? null : partPath;
-        }
-
     }
-
-
 }
