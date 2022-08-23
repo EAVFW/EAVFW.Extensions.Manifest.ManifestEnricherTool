@@ -9,7 +9,7 @@
 	  <Authors>Poul Kjeldager</Authors>
 	  <Description>SDK for EAVFW Manifest</Description>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <RepositoryUrl>https://github.com/EAVFW/EAVFW.Extensions.Manifest.SDK</RepositoryUrl>
+	  <RepositoryUrl>https://github.com/EAVFW/EAVFW.Extensions.Manifest.ManifestEnricherTool</RepositoryUrl>
 	  
   </PropertyGroup>
 
