@@ -198,17 +198,27 @@ namespace EAVFW.Extensions.Manifest.SDK
                                 {
 
                                     childProp.Remove();
-                                   
+                                  
                                     if (parentObj.ContainsKey(childProp.Name) && childProp.Value is JObject source && parentObj[childProp.Name] is JObject target)
                                     {
                                         target.Merge(source);
-                                        q.Enqueue(target.Property(childProp.Name));
+                                        q.Enqueue(parentObj.Property(childProp.Name));
                                         // parentObj[childProp.Name]
+                                    }
+                                    else if (parentObj.ContainsKey(childProp.Name) && JToken.DeepEquals(childProp.Value, parentObj[childProp.Name]))
+                                    {
+                                        q.Enqueue(parentObj.Property(childProp.Name));
                                     }
                                     else
                                     {
-                                        parentObj.Add(childProp);
-                                        q.Enqueue(childProp);
+                                        try
+                                        {
+                                            parentObj.Add(childProp);
+                                            q.Enqueue(childProp);
+                                        }catch(Exception ex)
+                                        {
+                                            throw;
+                                        }
                                     }
 
                                     // parentObj.Add(childProp.Name, childProp.Value);
