@@ -198,9 +198,21 @@ namespace EAVFW.Extensions.Manifest.SDK
                                 {
 
                                     childProp.Remove();
-                                    parentObj.Add(childProp);
+                                   
+                                    if (parentObj.ContainsKey(childProp.Name) && childProp.Value is JObject source && parentObj[childProp.Name] is JObject target)
+                                    {
+                                        target.Merge(source);
+                                        q.Enqueue(target.Property(childProp.Name));
+                                        // parentObj[childProp.Name]
+                                    }
+                                    else
+                                    {
+                                        parentObj.Add(childProp);
+                                        q.Enqueue(childProp);
+                                    }
+
                                     // parentObj.Add(childProp.Name, childProp.Value);
-                                    q.Enqueue(childProp);
+                                    
                                 }
 
                                 prop.Remove();
