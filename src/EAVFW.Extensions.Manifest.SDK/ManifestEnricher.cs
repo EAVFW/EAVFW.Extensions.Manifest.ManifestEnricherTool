@@ -122,7 +122,7 @@ namespace EAVFW.Extensions.Manifest.SDK
                 {
                     if (!attributes.Properties().Any(p => p.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false))
                     {
-                        attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true, type = "guid" });
+                        attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true, type = new { type = "guid" } });
                     }
 
 
