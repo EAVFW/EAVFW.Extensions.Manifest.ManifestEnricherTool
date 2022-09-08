@@ -447,7 +447,7 @@ namespace EAVFW.Extensions.Manifest.SDK
                                displayName = "Id",
                                logicalName = "id",
                                schemaName = "Id",
-                               type = "guid",
+                               type = new { type = "guid" },
                                isPrimaryKey = true,
                            },
                            [entityDefinition.Name] = new
