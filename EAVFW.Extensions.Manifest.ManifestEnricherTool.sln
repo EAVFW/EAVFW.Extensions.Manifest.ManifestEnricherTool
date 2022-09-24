@@ -14,12 +14,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0D61C87C-0809-4CD7-9200-D78AD11A1E22}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{C88FCAB5-AE8A-44CD-9195-2B085A6CD560}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E8050101-10D8-4B0E-B081-8A45BA2E4A61}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\.releaserc = .github\workflows\.releaserc
 		.github\workflows\build.yml = .github\workflows\build.yml
-		.github\workflows\dependabot.yml = .github\workflows\dependabot.yml
 		.github\workflows\release.yml = .github\workflows\release.yml
 		.github\workflows\todo.yml = .github\workflows\todo.yml
 	EndProjectSection
