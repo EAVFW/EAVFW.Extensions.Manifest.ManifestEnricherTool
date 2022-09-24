@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\.releaserc = .github\workflows\.releaserc
 		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\dependabot.yml = .github\workflows\dependabot.yml
 		.github\workflows\release.yml = .github\workflows\release.yml
 		.github\workflows\todo.yml = .github\workflows\todo.yml
 	EndProjectSection
@@ -32,7 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "eavfw", "eavfw", "{99FD28D4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetDevOps.Extensions.EAVFramework", "..\..\DotNetDevOps.Extensions.EAVFramework\src\DotNetDevOps.Extensions.EAVFramework.csproj", "{D1C56DB9-8FFA-4A4E-8DE5-2DCF4B003116}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EAVFW.Extensions.Manifest.SDK", "src\EAVFW.Extensions.Manifest.SDK\EAVFW.Extensions.Manifest.SDK.csproj", "{A69F8562-BDDF-4DE9-8768-E51B1FFFD368}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Manifest.SDK", "src\EAVFW.Extensions.Manifest.SDK\EAVFW.Extensions.Manifest.SDK.csproj", "{A69F8562-BDDF-4DE9-8768-E51B1FFFD368}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
