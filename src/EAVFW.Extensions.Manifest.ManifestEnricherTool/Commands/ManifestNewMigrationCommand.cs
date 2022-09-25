@@ -95,6 +95,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
                 extensions.Add(new XAttribute( $"manifest.{name.ToLower()}.json__JsonSchema".Replace(".","_1") ,"manifest.schema.json"));
 
+                var BuildIfChanged = project.Elements("Target").FirstOrDefault(n => n.Attribute("Name")?.Value == "BuildIfChanged");
+                var attr = BuildIfChanged.Attribute("Inputs");
+
+                attr.Value = attr.Value + $";$(MSBuildProjectDirectory)/manifest.{name.ToLower()}.json";
+
                 project.Save(csproj);
             }
 
