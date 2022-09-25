@@ -75,7 +75,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
             var semversion = Semver.SemVersion.Parse(version_gen.ToString(), Semver.SemVersionStyles.Strict);
 
-            var manifst = JToken.Parse($"{Path.GetDirectoryName(file)}/../manifest.json");
+            var manifst = JToken.Parse(File.ReadAllText($"{Path.GetDirectoryName(file)}/../manifest.json"));
             var version = manifst.SelectToken("$.version");
             version.Replace(semversion.WithPatch(semversion.Patch + 1).ToString());
             File.WriteAllText($"{Path.GetDirectoryName(file)}/../manifest.json", manifst.ToString(Formatting.Indented));
