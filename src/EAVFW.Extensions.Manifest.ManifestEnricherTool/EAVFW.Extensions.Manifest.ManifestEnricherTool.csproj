@@ -18,7 +18,7 @@
 
 		<RemoteEAVFramework>true</RemoteEAVFramework>
 		 
-		<LocalEAVFrameworkPath>..\..\..\..\DotNetDevOps.Extensions.EAVFramework</LocalEAVFrameworkPath>
+		<LocalEAVFrameworkPath>..\..\..\..\EAVFramework</LocalEAVFrameworkPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -40,12 +40,12 @@
 
 	<ItemGroup Condition="$(RemoteEAVFramework) == 'false'">
 
-		<ProjectReference Include="$(LocalEAVFrameworkPath)\src\DotNetDevOps.Extensions.EAVFramework.csproj" />
+		<ProjectReference Include="$(LocalEAVFrameworkPath)\src\EAVFramework.csproj" />
 
 	</ItemGroup>
 
 	<ItemGroup Condition="$(RemoteEAVFramework) != 'false'">
-		<PackageReference Include="DotNetDevOps.Extensions.EAVFramework" Version="1.0.164" />
+		<PackageReference Include="EAVFramework" Version="1.0.0" />
 
 	</ItemGroup>
 

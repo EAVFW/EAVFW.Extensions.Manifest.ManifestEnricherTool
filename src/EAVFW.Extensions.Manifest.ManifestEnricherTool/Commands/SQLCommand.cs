@@ -1,4 +1,4 @@
-﻿using DotNetDevOps.Extensions.EAVFramework;
+﻿using EAVFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -65,7 +65,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             optionsBuilder.ReplaceService<IMigrationsAssembly, DbSchemaAwareMigrationAssembly>();
 
             var ctx = new DynamicContext(optionsBuilder.Options, Microsoft.Extensions.Options.Options.Create(
-                 new DotNetDevOps.Extensions.EAVFramework.DynamicContextOptions
+                 new EAVFramework.DynamicContextOptions
                  {
                      Manifests = new[] { model }.Concat(models).ToArray(),
                      PublisherPrefix = schema,
