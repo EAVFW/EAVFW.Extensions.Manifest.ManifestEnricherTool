@@ -20,6 +20,8 @@ public class InstallCommand : Command
     public Option<string> Version = new Option<string>("--version", "The version to install");
     public Argument<string> PackageName = new Argument<string>("PackageName", "The package to install, a valid nuget package");
 
+    public Option<string> ShortName = new Option<string>("ShortName", "If provided, the installed extension is not merged in but added as a seperate module");
+
     public InstallCommand(IHttpClientFactory httpClientFactory) : base("install", "installs a manifest extesion")
     {
         Version.AddAlias("-v");
@@ -27,6 +29,8 @@ public class InstallCommand : Command
 
         Add(Version);
 
+        ShortName.IsRequired = false;
+        Add(ShortName);
 
         Add(PackageName);
 
@@ -74,8 +78,31 @@ public class InstallCommand : Command
             .Where(c=>Directory.GetFiles(Path.GetDirectoryName(c),"*.csproj").Any())
             .SingleOrDefault();
 
+        var shortName = parseResult.GetValueForOption(ShortName);
+        if (!string.IsNullOrEmpty(shortName))
+        {
+            var fileName = Path.ChangeExtension(manifestFilePath, $".{shortName}.json");
 
-        if (!string.IsNullOrEmpty(manifestFilePath))
+            if (File.Exists(fileName))
+            {
+                var original = JToken.Parse(File.ReadAllText(fileName)) as JObject;
+
+                manifest.Merge(original, new JsonMergeSettings
+                {
+                    // union array values together to avoid duplicates
+                    MergeArrayHandling = MergeArrayHandling.Union,
+                    PropertyNameComparison = System.StringComparison.OrdinalIgnoreCase,
+                    MergeNullValueHandling = MergeNullValueHandling.Ignore
+                });
+
+                File.WriteAllText(fileName, manifest.ToString(Formatting.Indented));
+            }
+            else
+            {
+                File.WriteAllText(fileName, manifest.ToString(Formatting.Indented));
+            }
+        }
+        else if (!string.IsNullOrEmpty(manifestFilePath))
         {
             File.Copy(manifestFilePath, Path.ChangeExtension(manifestFilePath,$".{Directory.GetFiles(Path.GetDirectoryName(manifestFilePath), "*.bac.json").Count()}.bac.json"));
 
