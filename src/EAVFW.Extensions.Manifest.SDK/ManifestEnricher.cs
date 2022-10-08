@@ -54,8 +54,8 @@ namespace EAVFW.Extensions.Manifest.SDK
 
             sb.AppendLine("DECLARE @adminSRId uniqueidentifier");
             sb.AppendLine("DECLARE @permissionId uniqueidentifier");
-            sb.AppendLine($"SET @adminSRId = ISNULL((SELECT s.Id FROM [${parameterGenerator.GetParameter("DBName")}].[${parameterGenerator.GetParameter("DBSchema")}].[SecurityRoles] s WHERE s.Name = 'System Administrator'),'{Guid.NewGuid()}')");
-            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [${parameterGenerator.GetParameter("DBName")}].[${parameterGenerator.GetParameter("DBSchema")}].[Identities] WHERE [Id] = '{adminSGId}')");
+            sb.AppendLine($"SET @adminSRId = ISNULL((SELECT s.Id FROM [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityRoles] s WHERE s.Name = 'System Administrator'),'{Guid.NewGuid()}')");
+            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Identities] WHERE [Id] = '{adminSGId}')");
             sb.AppendLine("BEGIN");
             sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Identities] (Id, Name, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', 'System Administrator Group', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
             sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityGroups] (Id) VALUES('{adminSGId}')");
