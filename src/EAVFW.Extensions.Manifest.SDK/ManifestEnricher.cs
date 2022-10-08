@@ -50,7 +50,7 @@ namespace EAVFW.Extensions.Manifest.SDK
         {
 
             var sb = new StringBuilder();
-            var adminSGId = "$(SystemAdminSecurityGroupId)";
+            var adminSGId = parameterGenerator.GetParameter("SystemAdminSecurityGroupId");// "$(SystemAdminSecurityGroupId)";
 
             sb.AppendLine("DECLARE @adminSRId uniqueidentifier");
             sb.AppendLine("DECLARE @permissionId uniqueidentifier");
