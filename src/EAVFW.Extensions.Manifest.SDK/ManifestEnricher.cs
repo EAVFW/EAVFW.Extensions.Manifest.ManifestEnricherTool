@@ -22,18 +22,20 @@ namespace EAVFW.Extensions.Manifest.SDK
     }
     public interface IParameterGenerator
     {
-        string GetParameter(string name);
+        string GetParameter(string name, bool escape=true);
     }
     public class SQLClientParameterGenerator : IParameterGenerator
     {
-        public string GetParameter(string name)
+        public string GetParameter(string name, bool escape)
         {
+            if(escape)
+                return $"'$({name})'";
             return $"$({name})";
         }
     }
     public class DataClientParameterGenerator : IParameterGenerator
     {
-        public string GetParameter(string name)
+        public string GetParameter(string name, bool escape)
         {
             return $"@{name}";
         }
@@ -54,16 +56,16 @@ namespace EAVFW.Extensions.Manifest.SDK
 
             sb.AppendLine("DECLARE @adminSRId uniqueidentifier");
             sb.AppendLine("DECLARE @permissionId uniqueidentifier");
-            sb.AppendLine($"SET @adminSRId = ISNULL((SELECT s.Id FROM [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityRoles] s WHERE s.Name = 'System Administrator'),'{Guid.NewGuid()}')");
-            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Identities] WHERE [Id] = '{adminSGId}')");
+            sb.AppendLine($"SET @adminSRId = ISNULL((SELECT s.Id FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRoles] s WHERE s.Name = 'System Administrator'),'{Guid.NewGuid()}')");
+            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Identities] WHERE [Id] = '{adminSGId}')");
             sb.AppendLine("BEGIN");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Identities] (Id, Name, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', 'System Administrator Group', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityGroups] (Id) VALUES('{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Identities] (Id, Name,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES ('{parameterGenerator.GetParameter("UserGuid")}', '{parameterGenerator.GetParameter("UserName")}', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[{systemUserEntity}] (Id,Email) VALUES ('{parameterGenerator.GetParameter("UserGuid")}', '{parameterGenerator.GetParameter("UserEmail")}');");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityRoles] (Name, Description, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator', 'Access to all permissions', @adminSRId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityRoleAssignments] (IdentityId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', @adminSRId, '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityGroupMembers] (IdentityId, SecurityGroupId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{parameterGenerator.GetParameter("UserGuid")}', '{adminSGId}', '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Identities] (Id, Name, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', 'System Administrator Group', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityGroups] (Id) VALUES('{adminSGId}')");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Identities] (Id, Name,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES ({parameterGenerator.GetParameter("UserGuid")}, {parameterGenerator.GetParameter("UserName")}, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[{systemUserEntity}] (Id,Email) VALUES ({parameterGenerator.GetParameter("UserGuid")}, {parameterGenerator.GetParameter("UserEmail")});");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRoles] (Name, Description, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator', 'Access to all permissions', @adminSRId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRoleAssignments] (IdentityId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', @adminSRId, '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityGroupMembers] (IdentityId, SecurityGroupId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES({parameterGenerator.GetParameter("UserGuid")}, '{adminSGId}', '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
             sb.AppendLine("END;");
             foreach (var entitiy in model.SelectToken("$.entities").OfType<JProperty>())
             {
@@ -85,16 +87,16 @@ namespace EAVFW.Extensions.Manifest.SDK
         }
         private void WritePermissionStatement(StringBuilder sb, JProperty entitiy, string permission, string permissionName, string adminSGId, bool adminSRId1 = false)
         {
-            sb.AppendLine($"SET @permissionId = ISNULL((SELECT s.Id FROM [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Permissions] s WHERE s.Name = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}'),'{Guid.NewGuid()}')");
-            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Permissions] WHERE [Name] = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}')");
+            sb.AppendLine($"SET @permissionId = ISNULL((SELECT s.Id FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Permissions] s WHERE s.Name = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}'),'{Guid.NewGuid()}')");
+            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Permissions] WHERE [Name] = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}')");
             sb.AppendLine("BEGIN");
-            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[Permissions] (Name, Description, Id, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}', '{permissionName} access to {entitiy.Value.SelectToken("$.pluralName")}', @permissionId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Permissions] (Name, Description, Id, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}', '{permissionName} access to {entitiy.Value.SelectToken("$.pluralName")}, @permissionId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
             sb.AppendLine("END");
             if (adminSRId1)
             {
-                sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityRolePermissions] WHERE [Name] = 'System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}')");
+                sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRolePermissions] WHERE [Name] = 'System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}')");
                 sb.AppendLine("BEGIN");
-                sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName")}].[{parameterGenerator.GetParameter("DBSchema")}].[SecurityRolePermissions] (Name, PermissionId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}', @permissionId, @adminSRId, '{Guid.NewGuid()}', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
+                sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRolePermissions] (Name, PermissionId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}', @permissionId, @adminSRId, '{Guid.NewGuid()}', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
                 sb.AppendLine("END");
             }
         }
@@ -375,11 +377,11 @@ namespace EAVFW.Extensions.Manifest.SDK
                             {
                                 principalTable = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].logicalName").ToString(),
                                 principalColumn = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].attributes").OfType<JProperty>()
-                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}'].attributes").OfType<JProperty>())
+                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}].attributes").OfType<JProperty>())
                                     .GroupBy(k => k.Name).Select(g => g.First())
                                     .Single(a => a.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false).Value.SelectToken("$.logicalName").ToString(),
                                 principalNameColumn = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].attributes").OfType<JProperty>()
-                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}'].attributes").OfType<JProperty>())
+                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}].attributes").OfType<JProperty>())
                                     .GroupBy(k => k.Name).Select(g => g.First())
                                     .Single(a => a.Value.SelectToken("$.isPrimaryField")?.ToObject<bool>() ?? false).Value.SelectToken("$.logicalName").ToString(),
                                 name = TrimId(attr.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
@@ -642,7 +644,7 @@ namespace EAVFW.Extensions.Manifest.SDK
                         return true;
                     case "lookup":
 
-                        var foreignTable = jsonraw.SelectToken($"$.entities['{attrType.SelectToken("$.referenceType")}']");
+                        var foreignTable = jsonraw.SelectToken($"$.entities['{attrType.SelectToken("$.referenceType")}]");
                         var fatAttributes = foreignTable.SelectToken("$.attributes");
                         var fat = fatAttributes.OfType<JProperty>().Where(c => c.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false)
                             .Select(a => a.Value.SelectToken("$.type")).Single();
