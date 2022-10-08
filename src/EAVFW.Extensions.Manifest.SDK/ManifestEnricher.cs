@@ -644,7 +644,7 @@ namespace EAVFW.Extensions.Manifest.SDK
                         return true;
                     case "lookup":
 
-                        var foreignTable = jsonraw.SelectToken($"$.entities['{attrType.SelectToken("$.referenceType")}]");
+                        var foreignTable = jsonraw.SelectToken($"$.entities['{attrType.SelectToken("$.referenceType")}']");
                         var fatAttributes = foreignTable.SelectToken("$.attributes");
                         var fat = fatAttributes.OfType<JProperty>().Where(c => c.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false)
                             .Select(a => a.Value.SelectToken("$.type")).Single();
