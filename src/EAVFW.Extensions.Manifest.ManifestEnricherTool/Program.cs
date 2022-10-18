@@ -24,7 +24,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                    configure.AddDebug();
                    configure.AddConsole();
                })
-               .AddManifestEnricher()
+               .AddManifestSDK<SQLClientParameterGenerator>()              
                .AddSingleton<App>();
 
             serviceCollection.AddSingleton<Command, InstallCommand>();

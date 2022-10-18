@@ -1,4 +1,6 @@
 ﻿using EAVFramework;
+using EAVFW.Extensions.Manifest.SDK;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -6,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
@@ -13,11 +16,105 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
 
 
+     public class SQLApplyCommand : Command
+    {
+        public Option<string> ClientSecret = new Option<string>("ClientSecret", "");
+        public Option<string> ClientId = new Option<string>("ClientId", "");
+        public Option<string> Server = new Option<string>("Server", "");
+        public Option<string> DatabaseName = new Option<string>("DatabaseName", "");
+
+        public Option<string[]> Replacements = new Option<string[]>("Values");
+        public Option<string[]> Files = new Option<string[]>("Files");
+
+        public SQLApplyCommand() : base("apply")
+        {
+            Server.AddAlias("-S");
+            Add(Server);
+
+            ClientSecret.AddAlias("--client-secret");
+            Add(ClientSecret);
+
+            ClientId.AddAlias("--client-id");
+            Add(ClientId);
+            DatabaseName.AddAlias("-d");
+            Add(DatabaseName);
+
+            Replacements.AddAlias("-v");
+            Add(Replacements);
+
+
+            Replacements.AllowMultipleArgumentsPerToken = true;
+
+            Files.AddAlias("-i");
+            Add(Files);
+
+
+            Files.AllowMultipleArgumentsPerToken = true;
+
+
+            Handler = CommandHandler.Create<ParseResult, IConsole>(Run);
+        }
+
+        private async Task Run(ParseResult arg1, IConsole arg2)
+        {
+            var clientid = arg1.GetValueForOption(ClientId);
+            var clientSecret = arg1.GetValueForOption(ClientSecret);
+            var server = arg1.GetValueForOption(Server);
+            var database = arg1.GetValueForOption(DatabaseName);
+
+            var files = arg1.GetValueForOption(Files);
+            var _replacements = arg1.GetValueForOption(Replacements);
+
+            // Use your own server, database, app ID, and secret.
+            string ConnectionString = $@"Server={server}; Authentication=Active Directory Service Principal;Command Timeout=300; Encrypt=True; Database={database}; User Id={clientid}; Password={clientSecret}";
+            //var files = new[] { @"C:\dev\MedlemsCentralen\obj\dbinit\init.sql", @"C:\dev\MedlemsCentralen\obj\dbinit\init-systemadmin.sql" };
+            var replacements = _replacements.ToDictionary(k => k.Substring(0, k.IndexOf('=')), v => v.Substring(v.IndexOf('=') + 1));
+
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+      
+                await conn.OpenAsync();
+                foreach(var file in files)
+                {
+                    var cmdText = File.ReadAllText(file);
+                    foreach(var r in replacements)
+                    {
+                        cmdText = cmdText.Replace($"$({r.Key})", r.Value);
+                    }
+
+
+                   
+
+                    foreach (var sql in cmdText.Split("GO"))
+                    {
+                        using var cmd = conn.CreateCommand();
+                      
+                        cmd.CommandText = sql.Trim();
+                        //  await context.Context.Database.ExecuteSqlRawAsync(sql);
+
+                        if (!string.IsNullOrEmpty(cmd.CommandText))
+                        {
+                            var r = await cmd.ExecuteNonQueryAsync();
+                            Console.WriteLine("Rows changed: " + r);
+                        }
+                    }
+
+
+
+
+                  
+                     
+                }
+              
+            }
+        }
+    }
     public class SQLCommand : Command
     {
         public Argument<string> ProjectPath = new Argument<string>("ProjectPath", "The project path to EAV Model Project");
@@ -25,8 +122,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
         public Option<bool> ShouldGeneratePermissions = new Option<bool>("GeneratePermissions", "Should permissions be generated for each entity");
         public Option<string> SystemUserEntity = new Option<string>("SystemUserEntity", "The system user entity used to popuplate a system administrator account");
+        private readonly IManifestPermissionGenerator manifestPermissionGenerator;
 
-        public SQLCommand() : base("sql", "generalte sql files")
+        public SQLCommand(IManifestPermissionGenerator manifestPermissionGenerator) : base("sql", "generalte sql files")
         {
             ProjectPath.SetDefaultValue(".");
             Add(ProjectPath);
@@ -44,13 +142,17 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             Add(SystemUserEntity);
 
             Handler = CommandHandler.Create<ParseResult, IConsole>(Run);
+            this.manifestPermissionGenerator = manifestPermissionGenerator ?? throw new ArgumentNullException(nameof(manifestPermissionGenerator));
+
+            Add(new SQLApplyCommand());
+            
         }
         private async Task Run(ParseResult parseResult, IConsole console)
         {
             var projectPath = parseResult.GetValueForArgument(ProjectPath);
             var outputFile = parseResult.GetValueForOption(OutputFile);
             var outputDirectory = Path.GetDirectoryName(outputFile);
-            var schema = "$(DBSchema)";
+            var schema = "${schema}";
             var model = JToken.Parse(File.ReadAllText(Path.Combine(projectPath, "obj", "manifest.g.json")));
             var models = Directory.Exists(Path.Combine(projectPath, "manifests")) ? Directory.EnumerateFiles(Path.Combine(projectPath, "manifests"))
                 .Select(file => JToken.Parse(File.ReadAllText(file)))
@@ -95,53 +197,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             var systemUserEntity = parseResult.GetValueForOption(SystemUserEntity);
             //TODO : Fix such this is only done if security package is installed.
 
-            var sb = new StringBuilder();
-            var adminSGId = "$(SystemAdminSecurityGroupId)";
-            sb.AppendLine("DECLARE @adminSRId uniqueidentifier");
-            sb.AppendLine("DECLARE @permissionId uniqueidentifier");
-            sb.AppendLine($"SET @adminSRId = ISNULL((SELECT s.Id   FROM [$(DBName)].[$(DBSchema)].[SecurityRoles] s WHERE s.Name = 'System Administrator'),'{Guid.NewGuid()}')");
-            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [$(DBName)].[$(DBSchema)].[Identities] WHERE [Id] = '{adminSGId}')");
-            sb.AppendLine("BEGIN");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[Identities] (Id, Name, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', 'System Administrator Group', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityGroups] (Id) VALUES('{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[Identities] (Id, Name,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES ('$(UserGuid)', '$(UserName)', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[{systemUserEntity}] (Id,Email) VALUES ('$(UserGuid)', '$(UserEmail)');");           
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityRoles] (Name, Description, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator', 'Access to all permissions', @adminSRId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityRoleAssignments] (IdentityId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{adminSGId}', @adminSRId, '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityGroupMembers] (IdentityId, SecurityGroupId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('$(UserGuid)', '{adminSGId}', '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine("END;");
-            foreach (var entitiy in model.SelectToken("$.entities").OfType<JProperty>())
-            {
-                WritePermissionStatement(sb, entitiy, "ReadGlobal", "Global Read", adminSGId, true);
-                WritePermissionStatement(sb, entitiy, "Read", "Read", adminSGId);
-                WritePermissionStatement(sb, entitiy, "UpdateGlobal", "Global Update", adminSGId, true);
-                WritePermissionStatement(sb, entitiy, "Update", "Update", adminSGId);
-                WritePermissionStatement(sb, entitiy, "CreateGlobal", "Global Create", adminSGId, true);
-                WritePermissionStatement(sb, entitiy, "Create", "Create", adminSGId);
-                WritePermissionStatement(sb, entitiy, "DeleteGlobal", "Global Delete", adminSGId, true);
-                WritePermissionStatement(sb, entitiy, "Delete", "Delete", adminSGId);
-                WritePermissionStatement(sb, entitiy, "ShareGlobal", "Global Share", adminSGId, true);
-                WritePermissionStatement(sb, entitiy, "Share", "Share", adminSGId);
-                WritePermissionStatement(sb, entitiy, "AssignGlobal", "Global Assign", adminSGId, true);
-                WritePermissionStatement(sb, entitiy, "Assign", "Assign", adminSGId);
-            }
-          
-            await File.WriteAllTextAsync($"{outputDirectory}/init-systemadmin.sql", sb.ToString());
+            var sb = await manifestPermissionGenerator.CreateInitializationScript(model, systemUserEntity);
+
+
+            await File.WriteAllTextAsync($"{outputDirectory}/init-systemadmin.sql", sb);
         }
-        private static void WritePermissionStatement(StringBuilder sb, JProperty entitiy, string permission, string permissionName, string adminSGId, bool adminSRId1 = false)
-        {
-            sb.AppendLine($"SET @permissionId = ISNULL((SELECT s.Id   FROM [$(DBName)].[$(DBSchema)].[Permissions] s WHERE s.Name = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}'),'{Guid.NewGuid()}')");
-            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [$(DBName)].[$(DBSchema)].[Permissions] WHERE [Name] = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}')");
-            sb.AppendLine("BEGIN");
-            sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[Permissions] (Name, Description, Id, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}', '{permissionName} access to {entitiy.Value.SelectToken("$.pluralName")}', @permissionId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-            sb.AppendLine("END");
-            if (adminSRId1)
-            {
-                sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [$(DBName)].[$(DBSchema)].[SecurityRolePermissions] WHERE [Name] = 'System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}')");
-                sb.AppendLine("BEGIN");
-                sb.AppendLine($"INSERT INTO [$(DBName)].[$(DBSchema)].[SecurityRolePermissions] (Name, PermissionId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}', @permissionId, @adminSRId, '{Guid.NewGuid()}', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{adminSGId}','{adminSGId}','{adminSGId}')");
-                sb.AppendLine("END");
-            }
-        }
+    
     }
 }

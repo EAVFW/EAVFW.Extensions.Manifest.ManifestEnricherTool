@@ -7,23 +7,98 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace EAVFW.Extensions.Manifest.SDK
 {
-    public static class ServiceRegistrationExtension
+
+    public interface IManifestPermissionGenerator
     {
-        public static IServiceCollection AddManifestEnricher(this IServiceCollection services)
+
+        Task<string> CreateInitializationScript(JToken model, string systemUserEntity);
+
+    }
+    public interface IParameterGenerator
+    {
+        string GetParameter(string name, bool escape=true);
+    }
+    public class SQLClientParameterGenerator : IParameterGenerator
+    {
+        public string GetParameter(string name, bool escape)
         {
-            services.AddTransient<ISchemaNameManager, DefaultSchemaNameManager>();
-            services.AddTransient<IManifestReplacmentRunner, DefaultManifestReplacementRunner>();
-            services.AddTransient<IManifestPathExtracter, DefaultManifestPathExtracter>();           
-            services.AddTransient<IManifestEnricher, ManifestEnricher>();
+            if(escape)
+                return $"'$({name})'";
+            return $"$({name})";
+        }
+    }
+    public class DataClientParameterGenerator : IParameterGenerator
+    {
+        public string GetParameter(string name, bool escape)
+        {
+            return $"@{name}";
+        }
+    }
+    public class ManifestPermissionGenerator : IManifestPermissionGenerator
+    {
+        private readonly IParameterGenerator parameterGenerator;
 
-            services.AddOptions<ManifestEnricherOptions>();
+        public ManifestPermissionGenerator(IParameterGenerator parameterGenerator)
+        {
+            this.parameterGenerator = parameterGenerator ?? throw new ArgumentNullException(nameof(parameterGenerator));
+        }
+        public async Task<string> CreateInitializationScript(JToken model, string systemUserEntity)
+        {
 
-            return services;
+            var sb = new StringBuilder();
+            var adminSGId = parameterGenerator.GetParameter("SystemAdminSecurityGroupId");// "$(SystemAdminSecurityGroupId)";
+
+            sb.AppendLine("DECLARE @adminSRId uniqueidentifier");
+            sb.AppendLine("DECLARE @permissionId uniqueidentifier");
+            sb.AppendLine($"SET @adminSRId = ISNULL((SELECT s.Id FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRoles] s WHERE s.Name = 'System Administrator'),'{Guid.NewGuid()}')");
+            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Identities] WHERE [Id] = {adminSGId})");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Identities] (Id, Name, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES({adminSGId}, 'System Administrator Group', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,{adminSGId},{adminSGId},{adminSGId})");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityGroups] (Id) VALUES({adminSGId})");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Identities] (Id, Name,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES ({parameterGenerator.GetParameter("UserGuid")}, {parameterGenerator.GetParameter("UserName")}, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,{adminSGId},{adminSGId},{adminSGId})");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[{systemUserEntity}] (Id,Email) VALUES ({parameterGenerator.GetParameter("UserGuid")}, {parameterGenerator.GetParameter("UserEmail")});");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRoles] (Name, Description, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator', 'Access to all permissions', @adminSRId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,{adminSGId},{adminSGId},{adminSGId})");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRoleAssignments] (IdentityId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES({adminSGId}, @adminSRId, '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,{adminSGId},{adminSGId},{adminSGId})");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityGroupMembers] (IdentityId, SecurityGroupId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES({parameterGenerator.GetParameter("UserGuid")}, {adminSGId}, '{Guid.NewGuid()}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,{adminSGId},{adminSGId},{adminSGId})");
+            sb.AppendLine("END;");
+            foreach (var entitiy in model.SelectToken("$.entities").OfType<JProperty>())
+            {
+                WritePermissionStatement(sb, entitiy, "ReadGlobal", "Global Read", adminSGId,true);
+                WritePermissionStatement(sb, entitiy, "Read", "Read", adminSGId);
+                WritePermissionStatement(sb, entitiy, "UpdateGlobal", "Global Update", adminSGId, true);
+                WritePermissionStatement(sb, entitiy, "Update", "Update", adminSGId);
+                WritePermissionStatement(sb, entitiy, "CreateGlobal", "Global Create", adminSGId, true);
+                WritePermissionStatement(sb, entitiy, "Create", "Create", adminSGId);
+                WritePermissionStatement(sb, entitiy, "DeleteGlobal", "Global Delete", adminSGId, true);
+                WritePermissionStatement(sb, entitiy, "Delete", "Delete", adminSGId);
+                WritePermissionStatement(sb, entitiy, "ShareGlobal", "Global Share", adminSGId, true);
+                WritePermissionStatement(sb, entitiy, "Share", "Share", adminSGId);
+                WritePermissionStatement(sb, entitiy, "AssignGlobal", "Global Assign", adminSGId, true);
+                WritePermissionStatement(sb, entitiy, "Assign", "Assign", adminSGId);
+            }
+
+            return sb.ToString();
+        }
+        private void WritePermissionStatement(StringBuilder sb, JProperty entitiy, string permission, string permissionName, string adminSGId, bool adminSRId1 = false)
+        {
+            sb.AppendLine($"SET @permissionId = ISNULL((SELECT s.Id FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Permissions] s WHERE s.Name = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}'),'{Guid.NewGuid()}')");
+            sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Permissions] WHERE [Name] = '{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}')");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[Permissions] (Name, Description, Id, ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('{entitiy.Value.SelectToken("$.collectionSchemaName")}{permission}', '{permissionName} access to {entitiy.Value.SelectToken("$.pluralName")}', @permissionId, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,{adminSGId},{adminSGId},{adminSGId})");
+            sb.AppendLine("END");
+            if (adminSRId1)
+            {
+                sb.AppendLine($"IF NOT EXISTS(SELECT * FROM [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRolePermissions] WHERE [Name] = 'System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}')");
+                sb.AppendLine("BEGIN");
+                sb.AppendLine($"INSERT INTO [{parameterGenerator.GetParameter("DBName",false)}].[{parameterGenerator.GetParameter("DBSchema",false)}].[SecurityRolePermissions] (Name, PermissionId, SecurityRoleId, Id,ModifiedOn,CreatedOn,CreatedById,ModifiedById,OwnerId) VALUES('System Administrator - {entitiy.Value.SelectToken("$.collectionSchemaName")} - {permission}', @permissionId, @adminSRId, '{Guid.NewGuid()}', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,{adminSGId},{adminSGId},{adminSGId})");
+                sb.AppendLine("END");
+            }
         }
     }
     public class ManifestEnricher : IManifestEnricher
