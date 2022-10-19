@@ -10,9 +10,13 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
     {
         private readonly ILogger<ManifestCommand> ilogger;
 
-        public ManifestCommand(ILogger<ManifestCommand> ilogger ,ILogger<ManifestNewMigrationCommand> logger) : base("manifest", "Work with the manifest")
+        public ManifestCommand(
+            ILogger<ManifestCommand> ilogger ,
+            ILogger<ManifestNewMigrationCommand> logger,
+            ILogger<ManifestFixMigrationCommand> fixLogger) : base("manifest", "Work with the manifest")
         {
             this.AddCommand(new ManifestNewMigrationCommand(logger));
+            this.AddCommand(new ManifestFixMigrationCommand(fixLogger));
             this.ilogger = ilogger;
 
             Handler = CommandHandler.Create<ParseResult, IConsole>(Run);

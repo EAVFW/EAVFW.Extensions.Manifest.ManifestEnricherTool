@@ -14,16 +14,10 @@ using System.Xml.Linq;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
-    public static class Extensions
-    {
-        public static T GetValue<T>(this Argument<T> argument, ParseResult parser)
-            => parser.GetValueForArgument(argument);
-        public static T GetValue<T>(this Option<T> argument, ParseResult parser)
-           => parser.GetValueForOption(argument);
-    }
+    
     public class ManifestNewMigrationCommand : Command
     {
-        public Argument<string> ProjectPath = new Argument<string>("ProjectPath", "The project path to EAV Model Project");
+        public Argument<string> ProjectPath = new Argument<string>("--project-path", "The project path to EAV Model Project");
         public Option<string> SubModelName = new Option<string>("--sub-module-name", "Generate a new sub model with this name");
 
         private readonly ILogger<ManifestNewMigrationCommand> logger;
