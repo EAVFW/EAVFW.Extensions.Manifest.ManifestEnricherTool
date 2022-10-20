@@ -57,7 +57,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             var projectPath = parseResult.GetValueForArgument(ProjectPath);
             var outputFile = parseResult.GetValueForOption(OutputFile);
             var outputDirectory = Path.GetDirectoryName(outputFile);
-            var schema = "${schema}";
+            var schema = "$(DBSchema)";
             var model = JToken.Parse(File.ReadAllText(Path.Combine(projectPath, "obj", "manifest.g.json")));
             var models = Directory.Exists(Path.Combine(projectPath, "manifests")) ? Directory.EnumerateFiles(Path.Combine(projectPath, "manifests"))
                 .Select(file => JToken.Parse(File.ReadAllText(file)))
