@@ -157,202 +157,53 @@ namespace EAVFW.Extensions.Manifest.SDK
         {
 
 
-
+            var entities = jsonraw.SelectToken("$.entities") as JObject;
             var insertMerges = jsonraw.SelectToken("$.variables.options.insertMergeLayoutVariable")?.ToObject<string>();
 
-            foreach (var entitieP in (jsonraw.SelectToken("$.entities") as JObject)?.Properties() ?? Enumerable.Empty<JProperty>())
+            
+            foreach (var entitieP in (entities)?.Properties() ?? Enumerable.Empty<JProperty>())
             {
                 var entity = (JObject)entitieP.Value;
 
-                if (!entity.ContainsKey("displayName"))
-                    entity["displayName"] = entitieP.Name;
-                if (!entity.ContainsKey("schemaName"))
-                    entity["schemaName"] = entity.SelectToken("$.displayName")?.ToString().Replace(" ", "");
-                if (!entity.ContainsKey("logicalName"))
-                    entity["logicalName"] = entity.SelectToken("$.schemaName")?.ToString().ToLower();
+                SetRequiredProps(entity, entitieP.Name);
 
-                if (!entity.ContainsKey("collectionSchemaName"))
-                    entity["collectionSchemaName"] = schemaName.ToSchemaName(entity["pluralName"]?.ToString());
+                await EnrichEntity(jsonraw, customizationprefix, logger, insertMerges,  entity);
 
-                JObject SetDefault(JToken obj, JObject localeEnglish)
+            }
+
+
+            foreach (var entitieP in (entities)?.Properties().ToArray() ?? Enumerable.Empty<JProperty>())
+            {
+                foreach (var polyLookup in entitieP.Value.SelectToken("$.attributes").OfType<JProperty>().Where(c => c.Value.SelectToken("$.type.type")?.ToString().ToLower() == "polylookup"))
                 {
-                    var value = new JObject(new JProperty("1033", localeEnglish));
-                    obj["locale"] = value;
-                    return value;
+                    var Key = $"{entitieP.Name} {polyLookup.Name} Reference";
+                    var pluralName = $"{entitieP.Value.SelectToken("$.displayName")} {polyLookup.Value.SelectToken("$.displayName")} References";
+                    var attributes = polyLookup.Value.SelectToken("$.type.referenceTypes").ToObject<string[]>()
+                        .ToDictionary(k => k, v => JToken.FromObject(new { type = new { type="lookup", referenceType=v } }));
+
+                   
+
+                    attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true });
+                    attributes["Name"] = JToken.FromObject(new { isPrimaryField = true });
+                    entities[Key] = JToken.FromObject(new
+                    {
+                        pluralName = pluralName,
+                        attributes= attributes
+                    });
+                    var entity = entities[Key] as JObject;
+
+                    SetRequiredProps(entity, Key);
+
+                    polyLookup.Value["type"]["foreignKey"] = JToken.FromObject(new
+                    {
+                        principalTable = entity["logicalName"].ToString(),
+                        principalColumn = "id",
+                        principalNameColumn = "name",
+                        name = TrimId(polyLookup.Value.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
+                    });
+
+                    await EnrichEntity(jsonraw, customizationprefix, logger, insertMerges, entity);
                 }
-                var entityLocaleEnglish = new JObject(new JProperty("displayName", entity["displayName"]), new JProperty("pluralName", entity["pluralName"]));
-                var entityLocale = entity.SelectToken("$.locale") as JObject ?? SetDefault(entity, entityLocaleEnglish);
-                if (!entityLocale.ContainsKey("1033"))
-                    entityLocale["1033"] = entityLocaleEnglish;
-
-
-                var attributes = entitieP.Value.SelectToken("$.attributes") as JObject;
-
-                if (attributes == null)
-                {
-                    entitieP.Value["attributes"] = attributes = new JObject();
-                }
-
-                if (attributes != null)
-                {
-                    if (!attributes.Properties().Any(p => p.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false))
-                    {
-                        attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true, type = new { type = "guid" } });
-                    }
-
-
-                    //Replace string attributes
-                    foreach (var attr in attributes.Properties().ToArray())
-                    {
-                        if (attr.Name == "[merge()]")
-                        {
-                            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr);
-                        }
-                        else if (attr.Value.Type == JTokenType.String)
-                        {
-                            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr.Value);
-                        }
-                    }
-
-                    var queue = new Queue<JObject?>(attributes.Properties().Select(c => c.Value as JObject));
-
-                    foreach (var attribute in attributes.Properties())
-                    {
-                        if (!string.IsNullOrEmpty(insertMerges))
-                        {
-                            var value = attribute.Value as JObject;
-                            if (!value?.ContainsKey("[merge()]") ?? false)
-                                value.Add(new JProperty("[merge()]", $"[variables('{insertMerges}')]"));
-                            queue.Enqueue(value);
-                        }
-                    }
-
-
-                    while (queue.Count > 0)
-                    {
-                        var attr = queue.Dequeue();
-
-
-
-                        if (!attr.ContainsKey("displayName"))
-                            attr["displayName"] = (attr.Parent as JProperty)?.Name;
-
-                        if (attr["type"]?.ToString() == "address")
-                        {
-
-                            var displayName = attr.SelectToken("$.displayName")?.ToString();
-
-                            attr["__unroll__path"] = attr.Path;
-
-                            var unrolls = new[] {
-                            Merge(attr,new { displayName=$"{displayName}: Address Type", type=new { type ="picklist",
-                                isGlobal=false,
-                                name=$"{displayName}: Address Type",
-                                options=CreateOptions("Bill To","Ship To","Primary","Other")
-                            } }),
-                            Merge(attr,new { displayName=$"{displayName}: City", type="string"}),
-                            Merge(attr,new { displayName=$"{displayName}: Country", type="string", schemaName=schemaName.ToSchemaName( $"{displayName}: Country")}),
-                            Merge(attr,new { displayName=$"{displayName}: County", type="string"}),
-                            Merge(attr,new { displayName=$"{displayName}: Fax", type="string"}),
-                            Merge(attr,new { displayName=$"{displayName}: Freight Terms", schemaName=schemaName.ToSchemaName( $"{displayName}: Freight Terms Code"), type=new { type="picklist",
-                                isGlobal=false,
-                                name=$"{displayName}: Freight Terms",
-                                options=CreateOptions("FOB","No Charge")
-                            } }),
-                           // Merge(attr,new { displayName=$"{displayName}: Id",schemaName=ToSchemaName( $"{displayName}: AddressId"),type ="guid"}),
-                            CreateAttribute(attr,$"{displayName}: Latitude","float"),
-                            CreateAttribute(attr,$"{displayName}: Longitude","float"),
-                            CreateAttribute(attr,$"{displayName}: Name","string",null, new { isPrimaryField = !attributes.Properties().Any(p=>p.Value.SelectToken("$.isPrimaryField") != null) }),
-                            CreateAttribute(attr,$"{displayName}: Phone","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 1")),
-                            CreateAttribute(attr,$"{displayName}: Telephone 2","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 2")),
-                            CreateAttribute(attr,$"{displayName}: Telephone 3","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 3")),
-                            CreateAttribute(attr,$"{displayName}: Post Office Box","string"),
-                            CreateAttribute(attr,$"{displayName}: Primary Contact Name","string"),
-                            CreateAttribute(attr,$"{displayName}: Shipping Method",new { type="picklist",
-                                isGlobal=false,
-                                name=$"{displayName}: Shipping Method",
-                                options=CreateOptions("Airborne","DHL","FedEx","UPS","Postal Mail","Full Load","Will Call"),
-                            }, schemaName.ToSchemaName( $"{displayName}: Shipping Method Code")),
-                            CreateAttribute(attr,$"{displayName}: State/Province","string"),
-                            CreateAttribute(attr,$"{displayName}: Street 1","string",schemaName.ToSchemaName( $"{displayName}: line1")),
-                            CreateAttribute(attr,$"{displayName}: Street 2","string",schemaName.ToSchemaName( $"{displayName}: line2")),
-                            CreateAttribute(attr,$"{displayName}: Street 3","string",schemaName.ToSchemaName( $"{displayName}: line3")),
-                            CreateAttribute(attr,$"{displayName}: UPS Zone","string"),
-                            CreateAttribute(attr,$"{displayName}: UTC Offset","timezone"),
-                            CreateAttribute(attr,$"{displayName}: ZIP/Postal Code","string",schemaName.ToSchemaName( $"{displayName}: Postal Code")),
-                            CreateAttribute(attr,$"{displayName}: State/Province","string"),
-
-                        };
-
-                            attr["schemaName"] = displayName.Replace(" ", "").Replace(":", "_") + "_Composite";
-                            attr["type"] = "MultilineText";
-
-
-                            foreach (var unroll in unrolls)
-                            {
-                                queue.Enqueue(unroll);
-                            }
-
-                            //if(!attributes.Properties().Any(p=>p.Value.SelectToken("$.isPrimaryField") != null))
-                            //{
-                            //    attr["type"] = JObject.FromObject(new { type = "string", maxLength = 1024 });
-                            //    attr["isPrimaryField"] = true;
-                            //}
-
-                        }
-
-
-                        if (!attr.ContainsKey("schemaName"))
-                        {
-
-                            attr["schemaName"] = schemaName.ToSchemaName(attr.SelectToken("$.displayName").ToString());
-
-                            await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr);
-
-                            switch (attr.SelectToken("$.type.type")?.ToString()?.ToLower())
-                            {
-                                case "lookup":
-                                case "customer":
-                                    if (!attr["schemaName"].ToString().EndsWith("Id"))
-                                        attr["schemaName"] = $"{schemaName.ToSchemaName(attr.SelectToken("$.displayName").ToString())}Id";
-
-
-
-                                    break;
-
-                            }
-                        }
-
-
-                        if (!attr.ContainsKey("logicalName"))
-                            attr["logicalName"] = attr.SelectToken("$.schemaName").ToString().ToLower();
-
-                        if (!attr.ContainsKey("type"))
-                            attr["type"] = "string";
-
-                        if (attr.Parent == null && !(attributes.ContainsKey(attr["logicalName"].ToString()) || attributes.ContainsKey(attr["schemaName"].ToString()) || attributes.ContainsKey(attr["displayName"].ToString())))
-                            attributes[attr["logicalName"].ToString()] = attr;
-
-                        if (attr.SelectToken("$.type").Type == JTokenType.String)
-                        {
-                            attr["type"] = JToken.FromObject(new { type = attr.SelectToken("$.type") });
-                        }
-
-
-
-                    }
-
-                    foreach (var attr in attributes.Properties())
-                    {
-                        var attributeLocaleEnglish = new JObject(new JProperty("displayName", attr.Value["displayName"]));
-                        var attributeLocale = attr.Value.SelectToken("$.locale") as JObject ?? SetDefault(attr.Value, attributeLocaleEnglish);
-                        if (!attributeLocale.ContainsKey("1033"))
-                            attributeLocale["1033"] = attributeLocaleEnglish;
-                    }
-
-
-                }
-
             }
 
 
@@ -627,6 +478,7 @@ namespace EAVFW.Extensions.Manifest.SDK
                         return true;
 
                     case "customer":
+                    case "polylookup":
                         return false;
                     case "string":
                     case "text":
@@ -643,6 +495,7 @@ namespace EAVFW.Extensions.Manifest.SDK
                         type = "boolean";
                         return true;
                     case "lookup":
+                   
 
                         var foreignTable = jsonraw.SelectToken($"$.entities['{attrType.SelectToken("$.referenceType")}']");
                         var fatAttributes = foreignTable.SelectToken("$.attributes");
@@ -726,14 +579,16 @@ namespace EAVFW.Extensions.Manifest.SDK
 
 
 
-                        var logicalName = attrValue.SelectToken("$.logicalName").ToString();
-                        var displayName = attrValue.SelectToken("$.displayName").ToString();
+                       
 
                         var propValues = new JObject();
-                        propValues["title"] = displayName;
+                       
                         if (!ConvertToSchemaType(attrType, out var type)) continue;
-                        propValues["type"] = type;
 
+                        var logicalName = attrValue.SelectToken("$.logicalName").ToString();
+                        var displayName = attrValue.SelectToken("$.displayName").ToString();
+                        propValues["title"] = displayName;
+                        propValues["type"] = type;
                         properties[logicalName] = propValues;
                     }
 
@@ -752,5 +607,200 @@ namespace EAVFW.Extensions.Manifest.SDK
             return json;
         }
 
+        private async Task EnrichEntity(JToken jsonraw, string customizationprefix, ILogger logger, string insertMerges, JObject entity)
+        {
+            JObject SetDefault(JToken obj, JObject localeEnglish)
+            {
+                var value = new JObject(new JProperty("1033", localeEnglish));
+                obj["locale"] = value;
+                return value;
+            }
+            var entityLocaleEnglish = new JObject(new JProperty("displayName", entity["displayName"]), new JProperty("pluralName", entity["pluralName"]));
+            var entityLocale = entity.SelectToken("$.locale") as JObject ?? SetDefault(entity, entityLocaleEnglish);
+            if (!entityLocale.ContainsKey("1033"))
+                entityLocale["1033"] = entityLocaleEnglish;
+
+
+            var attributes = entity.SelectToken("$.attributes") as JObject;
+
+            if (attributes == null)
+            {
+                entity["attributes"] = attributes = new JObject();
+            }
+
+            if (attributes != null)
+            {
+                if (!attributes.Properties().Any(p => p.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false))
+                {
+                    attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true, type = new { type = "guid" } });
+                }
+
+
+                //Replace string attributes
+                foreach (var attr in attributes.Properties().ToArray())
+                {
+                    if (attr.Name == "[merge()]")
+                    {
+                        await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr);
+                    }
+                    else if (attr.Value.Type == JTokenType.String)
+                    {
+                        await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr.Value);
+                    }
+                }
+
+                var queue = new Queue<JObject?>(attributes.Properties().Select(c => c.Value as JObject));
+
+                foreach (var attribute in attributes.Properties())
+                {
+                    if (!string.IsNullOrEmpty(insertMerges))
+                    {
+                        var value = attribute.Value as JObject;
+                        if (!value?.ContainsKey("[merge()]") ?? false)
+                            value.Add(new JProperty("[merge()]", $"[variables('{insertMerges}')]"));
+                        queue.Enqueue(value);
+                    }
+                }
+
+
+                while (queue.Count > 0)
+                {
+                    var attr = queue.Dequeue();
+
+
+
+                    if (!attr.ContainsKey("displayName"))
+                        attr["displayName"] = (attr.Parent as JProperty)?.Name;
+
+                    if (attr["type"]?.ToString() == "address")
+                    {
+
+                        var displayName = attr.SelectToken("$.displayName")?.ToString();
+
+                        attr["__unroll__path"] = attr.Path;
+
+                        var unrolls = new[] {
+                            Merge(attr,new { displayName=$"{displayName}: Address Type", type=new { type ="picklist",
+                                isGlobal=false,
+                                name=$"{displayName}: Address Type",
+                                options=CreateOptions("Bill To","Ship To","Primary","Other")
+                            } }),
+                            Merge(attr,new { displayName=$"{displayName}: City", type="string"}),
+                            Merge(attr,new { displayName=$"{displayName}: Country", type="string", schemaName=schemaName.ToSchemaName( $"{displayName}: Country")}),
+                            Merge(attr,new { displayName=$"{displayName}: County", type="string"}),
+                            Merge(attr,new { displayName=$"{displayName}: Fax", type="string"}),
+                            Merge(attr,new { displayName=$"{displayName}: Freight Terms", schemaName=schemaName.ToSchemaName( $"{displayName}: Freight Terms Code"), type=new { type="picklist",
+                                isGlobal=false,
+                                name=$"{displayName}: Freight Terms",
+                                options=CreateOptions("FOB","No Charge")
+                            } }),
+                           // Merge(attr,new { displayName=$"{displayName}: Id",schemaName=ToSchemaName( $"{displayName}: AddressId"),type ="guid"}),
+                            CreateAttribute(attr,$"{displayName}: Latitude","float"),
+                            CreateAttribute(attr,$"{displayName}: Longitude","float"),
+                            CreateAttribute(attr,$"{displayName}: Name","string",null, new { isPrimaryField = !attributes.Properties().Any(p=>p.Value.SelectToken("$.isPrimaryField") != null) }),
+                            CreateAttribute(attr,$"{displayName}: Phone","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 1")),
+                            CreateAttribute(attr,$"{displayName}: Telephone 2","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 2")),
+                            CreateAttribute(attr,$"{displayName}: Telephone 3","phone", schemaName.ToSchemaName( $"{displayName}: Telephone 3")),
+                            CreateAttribute(attr,$"{displayName}: Post Office Box","string"),
+                            CreateAttribute(attr,$"{displayName}: Primary Contact Name","string"),
+                            CreateAttribute(attr,$"{displayName}: Shipping Method",new { type="picklist",
+                                isGlobal=false,
+                                name=$"{displayName}: Shipping Method",
+                                options=CreateOptions("Airborne","DHL","FedEx","UPS","Postal Mail","Full Load","Will Call"),
+                            }, schemaName.ToSchemaName( $"{displayName}: Shipping Method Code")),
+                            CreateAttribute(attr,$"{displayName}: State/Province","string"),
+                            CreateAttribute(attr,$"{displayName}: Street 1","string",schemaName.ToSchemaName( $"{displayName}: line1")),
+                            CreateAttribute(attr,$"{displayName}: Street 2","string",schemaName.ToSchemaName( $"{displayName}: line2")),
+                            CreateAttribute(attr,$"{displayName}: Street 3","string",schemaName.ToSchemaName( $"{displayName}: line3")),
+                            CreateAttribute(attr,$"{displayName}: UPS Zone","string"),
+                            CreateAttribute(attr,$"{displayName}: UTC Offset","timezone"),
+                            CreateAttribute(attr,$"{displayName}: ZIP/Postal Code","string",schemaName.ToSchemaName( $"{displayName}: Postal Code")),
+                            CreateAttribute(attr,$"{displayName}: State/Province","string"),
+
+                        };
+
+                        attr["schemaName"] = displayName.Replace(" ", "").Replace(":", "_") + "_Composite";
+                        attr["type"] = "MultilineText";
+
+
+                        foreach (var unroll in unrolls)
+                        {
+                            queue.Enqueue(unroll);
+                        }
+
+                        //if(!attributes.Properties().Any(p=>p.Value.SelectToken("$.isPrimaryField") != null))
+                        //{
+                        //    attr["type"] = JObject.FromObject(new { type = "string", maxLength = 1024 });
+                        //    attr["isPrimaryField"] = true;
+                        //}
+
+                    }
+
+
+                    if (!attr.ContainsKey("schemaName"))
+                    {
+
+                        attr["schemaName"] = schemaName.ToSchemaName(attr.SelectToken("$.displayName").ToString());
+
+                        await manifestReplacmentRunner.RunReplacements(jsonraw, customizationprefix, logger, attr);
+
+                        switch (attr.SelectToken("$.type.type")?.ToString()?.ToLower())
+                        {
+                            case "lookup":
+                            case "polylookup":
+                            case "customer":
+                                if (!attr["schemaName"].ToString().EndsWith("Id"))
+                                    attr["schemaName"] = $"{schemaName.ToSchemaName(attr.SelectToken("$.displayName").ToString())}Id";
+
+
+
+                                break;
+
+                        }
+                    }
+
+
+                    if (!attr.ContainsKey("logicalName"))
+                        attr["logicalName"] = attr.SelectToken("$.schemaName").ToString().ToLower();
+
+                    if (!attr.ContainsKey("type"))
+                        attr["type"] = "string";
+
+                    if (attr.Parent == null && !(attributes.ContainsKey(attr["logicalName"].ToString()) || attributes.ContainsKey(attr["schemaName"].ToString()) || attributes.ContainsKey(attr["displayName"].ToString())))
+                        attributes[attr["logicalName"].ToString()] = attr;
+
+                    if (attr.SelectToken("$.type").Type == JTokenType.String)
+                    {
+                        attr["type"] = JToken.FromObject(new { type = attr.SelectToken("$.type") });
+                    }
+
+
+
+                }
+
+                foreach (var attr in attributes.Properties())
+                {
+                    var attributeLocaleEnglish = new JObject(new JProperty("displayName", attr.Value["displayName"]));
+                    var attributeLocale = attr.Value.SelectToken("$.locale") as JObject ?? SetDefault(attr.Value, attributeLocaleEnglish);
+                    if (!attributeLocale.ContainsKey("1033"))
+                        attributeLocale["1033"] = attributeLocaleEnglish;
+                }
+
+
+            }
+        }
+
+        private void SetRequiredProps(JObject entity, string key)
+        {
+            if (!entity.ContainsKey("displayName"))
+                entity["displayName"] = key;
+            if (!entity.ContainsKey("schemaName"))
+                entity["schemaName"] = entity.SelectToken("$.displayName")?.ToString().Replace(" ", "");
+            if (!entity.ContainsKey("logicalName"))
+                entity["logicalName"] = entity.SelectToken("$.schemaName")?.ToString().ToLower();
+
+            if (!entity.ContainsKey("collectionSchemaName"))
+                entity["collectionSchemaName"] = schemaName.ToSchemaName(entity["pluralName"]?.ToString());
+        }
     }
 }
