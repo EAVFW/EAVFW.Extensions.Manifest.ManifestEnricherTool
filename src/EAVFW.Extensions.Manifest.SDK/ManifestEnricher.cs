@@ -181,9 +181,9 @@ namespace EAVFW.Extensions.Manifest.SDK
                     var attributes = polyLookup.Value.SelectToken("$.type.referenceTypes").ToObject<string[]>()
                         .ToDictionary(k => k, v => JToken.FromObject(new { type = new { type="lookup", referenceType=v } }));
 
-                   
 
-                    attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true });
+                 
+                  //  attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true });
                     attributes["Name"] = JToken.FromObject(new { isPrimaryField = true });
                     entities[Key] = JToken.FromObject(new
                     {
@@ -201,6 +201,8 @@ namespace EAVFW.Extensions.Manifest.SDK
                         principalNameColumn = "name",
                         name = TrimId(polyLookup.Value.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
                     });
+                    polyLookup.Value["type"]["referenceType"] = Key;
+                  //  polyLookup.Value["type"]["type"] = "lookup";
 
                     await EnrichEntity(jsonraw, customizationprefix, logger, insertMerges, entity);
                 }
@@ -576,15 +578,12 @@ namespace EAVFW.Extensions.Manifest.SDK
                     {
                         var attrValue = attr.Value as JObject;
                         var attrType = attrValue.SelectToken("$.type");
-
-
-
-                       
-
-                        var propValues = new JObject();
+                         
+                        
                        
                         if (!ConvertToSchemaType(attrType, out var type)) continue;
 
+                        var propValues = new JObject();
                         var logicalName = attrValue.SelectToken("$.logicalName").ToString();
                         var displayName = attrValue.SelectToken("$.displayName").ToString();
                         propValues["title"] = displayName;
