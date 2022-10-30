@@ -75,13 +75,15 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                  new EAVFramework.DynamicContextOptions
                  {
                      Manifests = new[] { model }.Concat(models).ToArray(),
-                     PublisherPrefix = schema,
+                     Schema = schema,
                      EnableDynamicMigrations = true,
                      Namespace = "EAVFW.Extensions.Manifest",
                     // DTOAssembly = typeof(ApplicationExtensions).Assembly,
                     // DTOBaseClasses = new[] { typeof(BaseOwnerEntity<Model.Identity>), typeof(BaseIdEntity<Model.Identity>), typeof(KeyValueEntity<Model.Identity>) }
                  }),
-                 new MigrationManager(NullLogger<MigrationManager>.Instance, Microsoft.Extensions.Options.Options.Create(new MigrationManagerOptions() { SkipValidateSchemaNameForRemoteTypes = true }))
+                 new MigrationManager(NullLogger<MigrationManager>.Instance, Microsoft.Extensions.Options.Options.Create(new MigrationManagerOptions() {
+                     SkipValidateSchemaNameForRemoteTypes = true, Schema = schema, Namespace = "EAVFW.Extensions.Manifest", 
+                 }),new DynamicCodeServiceFactory())
                  , NullLogger<DynamicContext>.Instance);
 
  
