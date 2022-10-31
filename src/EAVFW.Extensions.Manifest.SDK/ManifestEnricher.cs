@@ -176,24 +176,30 @@ namespace EAVFW.Extensions.Manifest.SDK
             {
                 foreach (var polyLookup in entitieP.Value.SelectToken("$.attributes").OfType<JProperty>().Where(c => c.Value.SelectToken("$.type.type")?.ToString().ToLower() == "polylookup"))
                 {
-                    var Key = $"{entitieP.Name} {polyLookup.Name} Reference";
-                    var pluralName = $"{entitieP.Value.SelectToken("$.displayName")} {polyLookup.Value.SelectToken("$.displayName")} References";
-                    var attributes = polyLookup.Value.SelectToken("$.type.referenceTypes").ToObject<string[]>()
-                        .ToDictionary(k => k, v => JToken.FromObject(new { type = new { type="lookup", referenceType=v } }));
+                    var name = polyLookup.Value.SelectToken("$.type.name")?.ToString() ?? $"{entitieP.Name} {polyLookup.Name}";
+                    var Key = name + " Reference";
+                    var pluralName = name + " References"; //$"{entitieP.Value.SelectToken("$.displayName")} {polyLookup.Value.SelectToken("$.displayName")} References";
+
+                    if (!entities.ContainsKey(Key))
+                    { 
+                        var attributes = polyLookup.Value.SelectToken("$.type.referenceTypes").ToObject<string[]>()
+                            .ToDictionary(k => k, v => JToken.FromObject(new { type = new { type = "lookup", referenceType = v } }));
 
 
-                 
-                  //  attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true });
-                    attributes["Name"] = JToken.FromObject(new { isPrimaryField = true });
-                    entities[Key] = JToken.FromObject(new
-                    {
-                        pluralName = pluralName,
-                        attributes= attributes
-                    });
+
+                        //  attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true });
+                        attributes["Name"] = JToken.FromObject(new { isPrimaryField = true });
+                        entities[Key] = JToken.FromObject(new
+                        {
+                            pluralName = pluralName,
+                            attributes = attributes
+                        });
+                       
+
+                        SetRequiredProps(entities[Key] as JObject, Key);
+                    }
+
                     var entity = entities[Key] as JObject;
-
-                    SetRequiredProps(entity, Key);
-
                     polyLookup.Value["type"]["foreignKey"] = JToken.FromObject(new
                     {
                         principalTable = entity["logicalName"].ToString(),

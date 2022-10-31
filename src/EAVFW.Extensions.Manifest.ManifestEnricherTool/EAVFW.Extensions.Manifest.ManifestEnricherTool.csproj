@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
 		 
 		 
 		<PackAsTool>true</PackAsTool>
@@ -16,7 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/EAVFW/EAVFW.Extensions.Manifest.ManifestEnricherTool</RepositoryUrl>
 
-		<RemoteEAVFramework>false</RemoteEAVFramework>
+		<RemoteEAVFramework>true</RemoteEAVFramework>
 		 
 		<LocalEAVFrameworkPath>..\..\..\..\EAVFramework</LocalEAVFrameworkPath>
 	</PropertyGroup>
