@@ -30,6 +30,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             serviceCollection.AddSingleton<Command, InstallCommand>();
             serviceCollection.AddSingleton<Command, SQLCommand>();
             serviceCollection.AddSingleton<Command, ManifestCommand>();
+            serviceCollection.AddSingleton<Command, CertCommand>();
             serviceCollection.AddHttpClient();
             return serviceCollection;
         }
