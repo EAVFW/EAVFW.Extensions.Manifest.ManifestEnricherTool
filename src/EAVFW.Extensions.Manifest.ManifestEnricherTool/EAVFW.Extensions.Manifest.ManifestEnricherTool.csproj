@@ -35,16 +35,16 @@
 		 
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Semver" Version="2.1.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
+		 
 	</ItemGroup>
-	<!--<ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
+	<ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-	</ItemGroup>-->
+	</ItemGroup>
 	<ItemGroup Condition="$(RemoteEAVFramework) == 'false'">
 
 		<ProjectReference Include="$(LocalEAVFrameworkPath)\src\EAVFramework.csproj" />
@@ -52,7 +52,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="$(RemoteEAVFramework) != 'false'">
-		<PackageReference Include="EAVFramework" Version="2.2.0-dev.3" />
+		<PackageReference Include="EAVFramework" Version="2.2.0-dev.4" />
 
 	</ItemGroup>
 
