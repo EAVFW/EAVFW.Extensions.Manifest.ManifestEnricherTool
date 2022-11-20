@@ -1,11 +1,13 @@
 ﻿using EAVFramework;
 using EAVFW.Extensions.Manifest.SDK;
+using Microsoft.Azure.Documents.Spatial;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using NetTopologySuite.Geometries;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Point = NetTopologySuite.Geometries.Point;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
@@ -66,11 +69,12 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
             var optionsBuilder = new DbContextOptionsBuilder<DynamicContext>();
             //  optionsBuilder.UseInMemoryDatabase("test");
-            optionsBuilder.UseSqlServer( "dummy", x => x.MigrationsHistoryTable("__MigrationsHistory", schema));
+            optionsBuilder.UseSqlServer( "dummy", x => x.MigrationsHistoryTable("__MigrationsHistory", schema).UseNetTopologySuite());
             optionsBuilder.EnableSensitiveDataLogging();
+            
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.ReplaceService<IMigrationsAssembly, DbSchemaAwareMigrationAssembly>();
-
+            var test = typeof(Point);
             var ctx = new DynamicContext(optionsBuilder.Options, Microsoft.Extensions.Options.Options.Create(
                  new EAVFramework.DynamicContextOptions
                  {
@@ -93,6 +97,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
  
             Directory.CreateDirectory(outputDirectory);
             await File.WriteAllTextAsync(outputFile, sql);
+            console.WriteLine("Written: " + Path.GetFullPath(  outputFile));
 
             if(parseResult.GetValueForOption(ShouldGeneratePermissions))
                 await InitializeSystemAdministrator(parseResult, outputDirectory,model);
