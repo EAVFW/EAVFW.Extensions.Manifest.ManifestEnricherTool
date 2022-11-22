@@ -57,7 +57,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="$(RemoteEAVFramework) != 'false'">
-		<PackageReference Include="EAVFramework" Version="2.2.0-dev.7" />
+		<PackageReference Include="EAVFramework" Version="2.2.0" />
 
 	</ItemGroup>
 
