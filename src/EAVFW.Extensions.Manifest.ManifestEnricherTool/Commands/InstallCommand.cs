@@ -22,6 +22,7 @@ public class InstallCommand : Command
 
     public Option<string> ShortName = new Option<string>("ShortName", "If provided, the installed extension is not merged in but added as a seperate module");
 
+
     public InstallCommand(IHttpClientFactory httpClientFactory) : base("install", "installs a manifest extesion")
     {
         Version.AddAlias("-v");

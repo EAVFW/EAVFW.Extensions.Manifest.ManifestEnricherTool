@@ -44,7 +44,7 @@ public class App : System.CommandLine.RootCommand
         var path = parseResult.GetValueForOption(Path);
         var customizationprefix = parseResult.GetValueForOption(Prefix);
 
-        console.Out.Write($"Generating Manifest: v{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion}");
+        console.Out.Write($"Generating Manifest: v{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion} - {Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyVersionAttribute>()?.Version}");
 
        // var cmd = new EAVFW.Extensions.Manifest.ManifestEnricherTool.RootCommand();
 
