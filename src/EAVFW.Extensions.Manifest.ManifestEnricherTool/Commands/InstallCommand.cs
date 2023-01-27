@@ -105,7 +105,7 @@ public class InstallCommand : Command
         }
         else if (!string.IsNullOrEmpty(manifestFilePath))
         {
-            File.Copy(manifestFilePath, Path.ChangeExtension(manifestFilePath,$".{Directory.GetFiles(Path.GetDirectoryName(manifestFilePath), "*.bac.json").Count()}.bac.json"));
+          //  File.Copy(manifestFilePath, Path.ChangeExtension(manifestFilePath,$".{Directory.GetFiles(Path.GetDirectoryName(manifestFilePath), "*.bac.json").Count()}.bac.json"));
 
             var original = JToken.Parse(File.ReadAllText(manifestFilePath)) as JObject;
 
