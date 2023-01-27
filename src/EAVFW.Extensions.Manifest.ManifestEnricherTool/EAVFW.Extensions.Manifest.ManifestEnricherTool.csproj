@@ -31,7 +31,7 @@
 		<PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.1.3" />	 
 		<PackageReference Include="LibGit2Sharp" Version="0.26.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Semver" Version="2.1.0" />
+		<PackageReference Include="Semver" Version="2.2.0" />
 		 
 	</ItemGroup>
 	
@@ -57,7 +57,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="$(RemoteEAVFramework) != 'false'">
-		<PackageReference Include="EAVFramework" Version="2.2.0" />
+		<PackageReference Include="EAVFramework" Version="2.3.0" />
 
 	</ItemGroup>
 
