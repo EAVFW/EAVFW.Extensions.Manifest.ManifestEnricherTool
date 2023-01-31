@@ -25,12 +25,12 @@ jobs:
       #  run: dotnet restore EAVFW.Extensions.Manifest.ManifestEnricherTool.sln
 
       - name: Build solution
-        run: dotnet build -o ../build/ -c Release -m:1
+        run: dotnet build -c Release
 
-      - name: Archive build to artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: build
-          path: |
-            build/*
-          retention-days: 5
+      #- name: Archive build to artifacts
+      #  uses: actions/upload-artifact@v2
+      #  with:
+      #    name: build
+      #    path: |
+      #      build/*
+      #    retention-days: 5
