@@ -232,20 +232,32 @@ namespace EAVFW.Extensions.Manifest.SDK
                             throw new KeyNotFoundException($"The lookup entity does not exists: '{attr["type"]["referenceType"]}'");
                         case "lookup":
 
-                            attr["type"]["foreignKey"] = JToken.FromObject(new
-                            {
-                                principalTable = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].logicalName").ToString(),
-                                principalColumn = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].attributes").OfType<JProperty>()
-                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}'].attributes").OfType<JProperty>())
-                                    .GroupBy(k => k.Name).Select(g => g.First())
-                                    .Single(a => a.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false).Value.SelectToken("$.logicalName").ToString(),
-                                principalNameColumn = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].attributes").OfType<JProperty>()
-                                    .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}'].attributes").OfType<JProperty>())
-                                    .GroupBy(k => k.Name).Select(g => g.First())
-                                    .Single(a => a.Value.SelectToken("$.isPrimaryField")?.ToObject<bool>() ?? false).Value.SelectToken("$.logicalName").ToString(),
-                                name = TrimId(attr.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
-                            });
+                            
+                                var columns = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].attributes").OfType<JProperty>()
+                                        .Concat(jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT") == null ? Enumerable.Empty<JProperty>() : jsonraw.SelectToken($"$.entities['{jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].TPT")}'].attributes").OfType<JProperty>())
+                                        .GroupBy(k => k.Name).Select(g => g.First())
+                                        .ToArray();
 
+                                var principalTable = jsonraw.SelectToken($"$.entities['{attr["type"]["referenceType"]}'].logicalName").ToString();
+                                var principalColumn = columns
+                                        .FirstOrDefault(a => a.Value.SelectToken("$.isPrimaryKey")?.ToObject<bool>() ?? false)
+                                        ?.Value.SelectToken("$.logicalName").ToString()
+                                        ?? throw new InvalidOperationException($"Cant find principalColumn for lookup {entitieP.Name}.{attributeDefinition.Name}"); ;
+                            
+                                var principalNameColumn = columns
+                                        .FirstOrDefault(a => a.Value.SelectToken("$.isPrimaryField")?.ToObject<bool>() ?? false)
+                                        ?.Value.SelectToken("$.logicalName").ToString()
+                                        ?? throw new InvalidOperationException($"Cant find principalNameColumn for lookup {entitieP.Name}.{attributeDefinition.Name}");
+                                
+                                attr["type"]["foreignKey"] = JToken.FromObject(new
+                                {
+                                    principalTable = principalTable,
+                                    principalColumn = principalColumn,
+                                    principalNameColumn = principalNameColumn,
+                                    name = TrimId(attr.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
+                                });
+
+                            
                             break;
                         case "float":
                         case "decimal":

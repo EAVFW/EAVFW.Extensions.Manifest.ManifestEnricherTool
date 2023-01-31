@@ -1,0 +1,1001 @@
+{
+	"version": "1.0.0",
+	"entities": {
+		"Target Connection": {
+			"x-entity-type": "df_connection",
+			"attributes": {
+				"Id": {
+					"isPrimaryKey": true,
+					"type": {
+						"type": "guid"
+					}
+				},
+				"Target Id": {
+					"isPrimaryField": true,
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "connectionid"
+				},
+				"Source Id a": {
+					"type": {
+						"type": "lookup",
+						"referenceType": "Source AvailibleChecker",
+						"x-idField": "Id"
+					},
+					"logicalName": "sourceidaid"
+				},
+				"Search Code": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_name"
+				},
+				"Zipcode": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_zipcode"
+				},
+				"Street": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_street"
+				},
+				"City": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_city"
+				},
+				"Country": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_country"
+				},
+				"Housenumber": {
+					"type": {
+						"type": "integer"
+					},
+					"logicalName": "df_housenumber"
+				},
+				"Housenumber addition": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_housenumberaddition"
+				},
+				"Location Description": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_locationdescription"
+				},
+				"Comments": {
+					"type": {
+						"type": "MultilineText"
+					},
+					"logicalName": "df_comments"
+				},
+				"Projectcode": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_projectcode"
+				},
+				"Deliverystatus ": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_deliverystatus"
+				},
+				"Hasdate": {
+					"type": {
+						"type": "DateTime"
+					},
+					"logicalName": "df_hasdate"
+				},
+				"G Code": {
+					"type": {
+						"type": "lookup",
+						"referenceType": "Target df_portfolio", 
+						"x-idField": "Id"
+					},
+					"logicalName": "df_gcode"
+				},
+				"E Code": {
+					"type": {
+						"type": "lookup",
+						"referenceType": "Target df_portfolio",
+						"x-idField": "Id"
+					},
+					"logicalName": "df_ecode"
+				},
+				"A Code": {
+					"type": {
+						"type": "lookup",
+						"referenceType": "Target df_portfolio",
+						"x-idField": "Id"
+					},
+					"logicalName": "df_acode"
+				},
+				"Patch Status": {
+					"type": {
+						"type": "Choice",
+						"options": {
+							"NoPatch": 121780000,
+							"Patched": 121780001,
+							"Depatched": 121780002
+						}
+					},
+					"logicalName": "df_patchstatus"
+				},
+				"Civil Planned": {
+					"type": {
+						"type": "DateTime"
+					},
+					"logicalName": "df_civilplanned"
+				},
+				"Delivery date": {
+					"type": {
+						"type": "DateTime"
+					},
+					"logicalName": "df_deliverydate"
+				},
+				"Last update": {
+					"type": {
+						"type": "DateTime"
+					},
+					"logicalName": "df_lastupdate"
+				},
+				"Passive connection scenario": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_passiveconnectionscenario"
+				},
+				"Permission Ftu": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_permissionftu"
+				},
+				"Reason code": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_reasoncode"
+				},
+				"Reason code note": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_reasoncodenote"
+				},
+				"rfs date": {
+					"type": {
+						"type": "DateTime"
+					},
+					"logicalName": "df_rfsdate"
+				},
+				"Target rfs date": {
+					"type": {
+						"type": "DateTime"
+					},
+					"logicalName": "df_targetrfsdate"
+				},
+				"Administrators": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_administrators"
+				},
+				"Active operators": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperators"
+				},
+				"Area Active operators": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_areaactiveoperators"
+				},
+				"Area administrators": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_areaadministrators"
+				},
+				"Administrators2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_administrators2"
+				},
+				"Active operators 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperators2"
+				},
+				"Area Active operators2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_areaactiveoperators2"
+				},
+				"Area administrators 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_areaadministrators2"
+				},
+				"floortile": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_floortile"
+				},
+				"Pop location": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_poplocation"
+				},
+				"pop row": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_poprow"
+				},
+				"pop frame": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_popframe"
+				},
+				"pop shelf": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_popshelf"
+				},
+				"pop position": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_popposition"
+				},
+				"active port": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeport"
+				},
+				"active ordertype": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeordertype"
+				},
+				"active operator": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperator"
+				},
+				"active operator orderid": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperatororderid"
+				},
+				"active ordertype planned": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeordertypeplanned"
+				},
+				"Active operator planned": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperatorplanned"
+				},
+				"Active operator orderid planned": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperatororderidplanned"
+				},
+				"Module": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_module"
+				},
+				"Floortile 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_floortile2"
+				},
+				"pop location 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_poplocation2"
+				},
+				"Pop row 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_poprow2"
+				},
+				"pop frame 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_popframe2"
+				},
+				"Pop shelf 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_popshelf2"
+				},
+				"pop position 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_popposition2"
+				},
+				"Active port 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeport2"
+				},
+				"Active ordertype 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeordertype2"
+				},
+				"Active operator2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperator2"
+				},
+				"Active operator orderid 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperatororderid2"
+				},
+				"Active ordertype planned 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeordertypeplanned2"
+				},
+				"Active operator planned 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperatorplanned2"
+				},
+				"Active operator orderid planned 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_activeoperatororderidplanned2"
+				},
+				"Module 2": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_module2"
+				},
+				"DataSource": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_datasource"
+				},
+				"Data provider": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_dataprovider"
+				},
+				"DataSet": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_dataset"
+				},
+				"Net Area name": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_netareaname"
+				},
+				"Net Area Shortname": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_netareashortname"
+				},
+				"Ap Area Id": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_apareaid"
+				},
+				"Ap Area pop": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_apareapop"
+				}
+			},
+			"pluralName": "Target Connections"
+		},
+		"Source AvailibleChecker": {
+			"x-entity-type": "AvailibleChecker",
+			"pluralName": "Source AvailibleCheckers",
+			"attributes": {
+				"CODE": {
+					"type": "string",
+					"isPrimaryField": true
+				},
+				"TYPE": {
+					"type": "string"
+				},
+				"MESSAGE": {
+					"type": "string"
+				},
+				"X": {
+					"type": "string"
+				},
+				"Y": {
+					"type": "string"
+				},
+				"ZIPCODE": {
+					"type": "string"
+				},
+				"STREET": {
+					"type": "string"
+				},
+				"CITY": {
+					"type": "string"
+				},
+				"COUNTRY": {
+					"type": "string"
+				},
+				"HOUSENR": {
+					"type": "string"
+				},
+				"HOUSENR_SUFFIX": {
+					"type": "string"
+				},
+				"ROOM": {
+					"type": "string"
+				},
+				"WHAT_3_WORDS": {
+					"type": "string"
+				},
+				"PLUSCODE": {
+					"type": "string"
+				},
+				"ADDRESS_ID": {
+					"type": "string"
+				},
+				"XCOORD": {
+					"type": "string"
+				},
+				"YCOORD": {
+					"type": "string"
+				},
+				"SELF": {
+					"type": "string"
+				},
+				"FRAME": {
+					"type": "string"
+				},
+				"COMMENTS": {
+					"type": "string"
+				},
+				"PROJECTCODE": {
+					"type": "string"
+				},
+				"DELIVERYSTATUS": {
+					"type": "string"
+				},
+				"HASDATE": {
+					"type": "string"
+				},
+				"FTUTYPE": {
+					"type": "string"
+				},
+				"MONTHLYCODE": {
+					"type": "string"
+				},
+				"ONCEONLYCODE": {
+					"type": "string"
+				},
+				"REDEMPTIONCODE": {
+					"type": "string"
+				},
+				"FIXEDCHARGE_STATUS": {
+					"type": "string"
+				},
+				"BUILD": {
+					"type": "string"
+				},
+				"BUILDING_TYPE": {
+					"type": "string"
+				},
+				"CIVIL_PLANNED": {
+					"type": "string"
+				},
+				"DELIVERY_DATE": {
+					"type": "string"
+				},
+				"FORECAST_CONNECTED": {
+					"type": "string"
+				},
+				"FTU_TYPE_TO_BE_USED": {
+					"type": "string"
+				},
+				"LAST_UPDATE": {
+					"type": "string"
+				},
+				"PASSIVE_CONNECTION_SCENARIO": {
+					"type": "string"
+				},
+				"PERMISSION_FTU": {
+					"type": "string"
+				},
+				"REASON_CODE": {
+					"type": "string"
+				},
+				"REASON_CODE_NOTE": {
+					"type": "string"
+				},
+				"THIRD_PARTY_TRANSIT": {
+					"type": "string"
+				},
+				"RFS_DATE": {
+					"type": "string"
+				},
+				"TARGET_RFS_DATE": {
+					"type": "string"
+				},
+				"AGGR_ADMINISTRATORS": {
+					"type": "string"
+				},
+				"AGGR_ACTIVE_OPERATORS": {
+					"type": "string"
+				},
+				"AGGR_AREA_ACTIVE_OPERATORS": {
+					"type": "string"
+				},
+				"AGGR_AREA_ADMINISTRATORS": {
+					"type": "string"
+				},
+				"AGGR2_ADMINISTRATORS": {
+					"type": "string"
+				},
+				"AGGR2_ACTIVE_OPERATORS": {
+					"type": "string"
+				},
+				"AGGR2_AREA_ACTIVE_OPERATORS": {
+					"type": "string"
+				},
+				"AGGR2_AREA_ADMINISTRATORS": {
+					"type": "string"
+				},
+				"FTTHFIBER_FLOORTILE": {
+					"type": "string"
+				},
+				"FTTHFIBER_POP_LOCATION": {
+					"type": "string"
+				},
+				"FTTHFIBER_POP_ROW": {
+					"type": "string"
+				},
+				"FTTHFIBER_POP_FRAME": {
+					"type": "string"
+				},
+				"FTTHFIBER_POP_SHELF": {
+					"type": "string"
+				},
+				"FTTHFIBER_POP_POSITION": {
+					"type": "string"
+				},
+				"FTTHFIBER_ACTIVE_PORT": {
+					"type": "string"
+				},
+				"FTTHFIBER_ACTIVE_ORDERTYPE": {
+					"type": "string"
+				},
+				"FTTHFIBER_ACTIVE_OPERATOR": {
+					"type": "string"
+				},
+				"FTTHFIBER_ACTIVE_OPERATOR_ORDERID": {
+					"type": "string"
+				},
+				"FTTHFIBER_ACTIVE_ORDERTYPE_PLANNED": {
+					"type": "string"
+				},
+				"FTTHFIBER_ACTIVE_OPERATOR_PLANNED": {
+					"type": "string"
+				},
+				"FTTHFIBER_ACTIVE_OPERATOR_ORDERID_PLANNED": {
+					"type": "string"
+				},
+				"FTTHFIBER_MODULE": {
+					"type": "string"
+				},
+				"FTTHFIBER2_FLOORTILE": {
+					"type": "string"
+				},
+				"FTTHFIBER2_POP_LOCATION": {
+					"type": "string"
+				},
+				"FTTHFIBER2_POP_ROW": {
+					"type": "string"
+				},
+				"FTTHFIBER2_POP_FRAME": {
+					"type": "string"
+				},
+				"FTTHFIBER2_POP_SHELF": {
+					"type": "string"
+				},
+				"FTTHFIBER2_POP_POSITION": {
+					"type": "string"
+				},
+				"FTTHFIBER2_ACTIVE_PORT": {
+					"type": "string"
+				},
+				"FTTHFIBER2_ACTIVE_ORDERTYPE": {
+					"type": "string"
+				},
+				"FTTHFIBER2_ACTIVE_OPERATOR": {
+					"type": "string"
+				},
+				"FTTHFIBER2_ACTIVE_OPERATOR_ORDERID": {
+					"type": "string"
+				},
+				"FTTHFIBER2_ACTIVE_ORDERTYPE_PLANNED": {
+					"type": "string"
+				},
+				"FTTHFIBER2_ACTIVE_OPERATOR_PLANNED": {
+					"type": "string"
+				},
+				"FTTHFIBER2_ACTIVE_OPERATOR_ORDERID_PLANNED": {
+					"type": "string"
+				},
+				"FTTHFIBER2_MODULE": {
+					"type": "string"
+				},
+				"ADDRESS_GEOLOGICAL_POINT": {
+					"type": "string"
+				},
+				"BERTH_GEOPOINT": {
+					"type": "string"
+				},
+				"STAND_GEOPOINT": {
+					"type": "string"
+				},
+				"PROPERTY_GEOPOINT": {
+					"type": "string"
+				},
+				"H_GROUND_LEVEL": {
+					"type": "string"
+				},
+				"H_BUILDING": {
+					"type": "string"
+				},
+				"BUILDING_LAYER": {
+					"type": "string"
+				},
+				"VVE_PRESENT": {
+					"type": "string"
+				},
+				"VVE_NAME": {
+					"type": "string"
+				},
+				"WOCO_PRESENT": {
+					"type": "string"
+				},
+				"WOCO_NAME": {
+					"type": "string"
+				},
+				"BAG_SHORTED_STREETNAME": {
+					"type": "string"
+				},
+				"BAG_STREET_ID": {
+					"type": "string"
+				},
+				"BAG_HOUSE_LETTER": {
+					"type": "string"
+				},
+				"HOUSENB_EXTENSION": {
+					"type": "string"
+				},
+				"BAG_ID": {
+					"type": "string"
+				},
+				"NEIGHBOORHOOD_NAME": {
+					"type": "string"
+				},
+				"NEIGHBOORHOOD_CODE": {
+					"type": "string"
+				},
+				"DISTRICT_NAME": {
+					"type": "string"
+				},
+				"DISTRICT_CODE": {
+					"type": "string"
+				},
+				"CITY_CODE": {
+					"type": "string"
+				},
+				"MUNICIPALITY": {
+					"type": "string"
+				},
+				"MUNICIPALITY_CODE": {
+					"type": "string"
+				},
+				"PROVINCE_NAME": {
+					"type": "string"
+				},
+				"PROVINCE_CODE": {
+					"type": "string"
+				},
+				"SECONDARY_ADDRESS": {
+					"type": "string"
+				},
+				"ADDRESS_OBJECT_TYPE": {
+					"type": "string"
+				},
+				"ADDRESS_OBJECT_STATUS": {
+					"type": "string"
+				},
+				"USABLE_AREA_SQUARE_METER": {
+					"type": "string"
+				},
+				"NAD_AMOUNT_PER_ADDRESS_OBJECT": {
+					"type": "string"
+				},
+				"ADDRESS_OBJECT_ID": {
+					"type": "string"
+				},
+				"RESIDENTIAL_USAGE": {
+					"type": "string"
+				},
+				"PUBLIC_GATHERING_USAGE": {
+					"type": "string"
+				},
+				"DETENTION_PLACE_USAGE": {
+					"type": "string"
+				},
+				"HEALTH_CARE_USAGE": {
+					"type": "string"
+				},
+				"INDUSTRY_USAGE": {
+					"type": "string"
+				},
+				"OFFICE_USAGE": {
+					"type": "string"
+				},
+				"ACCOMMODATION_USAGE": {
+					"type": "string"
+				},
+				"EDUCATION_USAGE": {
+					"type": "string"
+				},
+				"SPORT_USAGE": {
+					"type": "string"
+				},
+				"RETAIL_USAGE": {
+					"type": "string"
+				},
+				"OTHER_USAGE": {
+					"type": "string"
+				},
+				"PROPERTIES_AMOUNT_VBO": {
+					"type": "string"
+				},
+				"PROPERTY_ID": {
+					"type": "string"
+				},
+				"VBOS_AMOUNT_PROPERTY": {
+					"type": "string"
+				},
+				"VBO_PND_1_OP_1": {
+					"type": "string"
+				},
+				"TOTAL_SURFACE_OF_OBJECT": {
+					"type": "string"
+				},
+				"HOUSE_TYPE": {
+					"type": "string"
+				},
+				"PROPERTY_PARAMETER": {
+					"type": "string"
+				},
+				"RATIO_OPP_VBO_OPP_PND": {
+					"type": "string"
+				},
+				"PROPERTY_STATUS": {
+					"type": "string"
+				},
+				"CONSTRUCTION_YEAR": {
+					"type": "string"
+				},
+				"UNIQUE_KEY": {
+					"type": "string"
+				},
+				"PCHNHLHT_KEY": {
+					"type": "string"
+				},
+				"PCHNHLHT_UNIQUE": {
+					"type": "string"
+				},
+				"ZIPCODE_HOUSENB_COMBINATION": {
+					"type": "string"
+				},
+				"ZIPCODE_HOUSENB_RANK": {
+					"type": "string"
+				},
+				"BAG_PURPOSE": {
+					"type": "string"
+				},
+				"STATUS": {
+					"type": "string"
+				},
+				"UPDATEDAT": {
+					"type": "string"
+				},
+				"CREATEDAT": {
+					"type": "string"
+				},
+				"DATASOURCE": {
+					"type": "string"
+				},
+				"DATAPROVIDER": {
+					"type": "string"
+				},
+				"DATASET": {
+					"type": "string"
+				},
+				"NAME": {
+					"type": "string"
+				},
+				"SHORTNAME": {
+					"type": "string"
+				},
+				"AP_AREA_ID": {
+					"type": "string"
+				},
+				"AP_AREA_POP": {
+					"type": "string"
+				},
+				"AL_ERROR_NUM": {
+					"type": "string"
+				},
+				"AL_ERROR_MSG": {
+					"type": "string"
+				}
+			}
+		},
+		"Target df_portfolio": {
+			"x-entity-type": "df_portfolio",
+			"attributes": {
+				"Id": {
+					"isPrimaryKey": true,
+					"type": {
+						"type": "guid"
+					}
+				},
+				"Target Id": {
+					"isPrimaryField": true,
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_portfolioid"
+				},
+				"Source Id a": {
+					"type": {
+						"type": "lookup",
+						"referenceType": "Source EOLItems",
+						"x-idField": "Id"
+					},
+					"logicalName": "sourceidaid"
+				},
+				"Description": {
+					"type": {
+						"type": "Text"
+					},
+					"logicalName": "df_description"
+				},
+				"Price": {
+					"type": {
+						"type": "decimal"
+					},
+					"logicalName": "df_price"
+				},
+				"Type": {
+					"type": {
+						"type": "Choice",
+						"options": {
+							"G": 121780000,
+							"E": 121780001,
+							"A": 121780002
+						}
+					},
+					"logicalName": "df_type"
+				}
+			},
+			"pluralName": "Target df_portfolios"
+		},
+		"Source EOLItems": {
+			"x-entity-type": "EOLItems",
+			"pluralName": "Source EOLItemss",
+			"attributes": {
+				"CODE": {
+					"type": "string",
+					"isPrimaryField": true
+				},
+				"ADMINISTRATIE_NR": {
+					"type": "string"
+				},
+				"DESCRIPTION": {
+					"type": "string"
+				},
+				"STARTDATE": {
+					"type": "string"
+				},
+				"ENDDATE": {
+					"type": "string"
+				},
+				"UNITPRICE": {
+					"type": "string"
+				},
+				"PRICESTARTDATE": {
+					"type": "string"
+				},
+				"PRICEENDDATE": {
+					"type": "string"
+				},
+				"VATCODE": {
+					"type": "string"
+				},
+				"SEARCHCODE": {
+					"type": "string"
+				},
+				"ITEMGROUPCODE": {
+					"type": "string"
+				},
+				"ITEMGROUPDESCRIPTION": {
+					"type": "string"
+				},
+				"BESTANDSNAAM": {
+					"type": "string"
+				},
+				"MD_EXNID": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
