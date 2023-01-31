@@ -21,11 +21,11 @@ jobs:
       - name: Cleaning
         run: dotnet clean
 
-      - name: Restore NuGet packages
-        run: dotnet restore EAVFW.Extensions.Manifest.ManifestEnricherTool.sln
+      #- name: Restore NuGet packages
+      #  run: dotnet restore EAVFW.Extensions.Manifest.ManifestEnricherTool.sln
 
       - name: Build solution
-        run: dotnet build -o ../build/ -c Release
+        run: dotnet build -o ../build/ -c Release -m:1
 
       - name: Archive build to artifacts
         uses: actions/upload-artifact@v2
