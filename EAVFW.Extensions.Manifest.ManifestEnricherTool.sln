@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0343EA18
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Manifest.ManifestEnricherTool", "src\EAVFW.Extensions.Manifest.ManifestEnricherTool\EAVFW.Extensions.Manifest.ManifestEnricherTool.csproj", "{C472564C-38FE-4465-BC62-FDCF45339C36}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Manifest.Tests", "tests\EAVFW.Extensions.Manifest.Tests\EAVFW.Extensions.Manifest.Tests.csproj", "{856357CE-BB26-4E6C-BAA2-B74FF8DC5734}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{C472564C-38FE-4465-BC62-FDCF45339C36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C472564C-38FE-4465-BC62-FDCF45339C36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C472564C-38FE-4465-BC62-FDCF45339C36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{856357CE-BB26-4E6C-BAA2-B74FF8DC5734}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{856357CE-BB26-4E6C-BAA2-B74FF8DC5734}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{856357CE-BB26-4E6C-BAA2-B74FF8DC5734}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{856357CE-BB26-4E6C-BAA2-B74FF8DC5734}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +70,7 @@ Global
 		{A69F8562-BDDF-4DE9-8768-E51B1FFFD368} = {0D61C87C-0809-4CD7-9200-D78AD11A1E22}
 		{B8E00220-CF68-4B02-831C-15E16D61E996} = {99FD28D4-904E-4601-8B15-BAE281F48576}
 		{C472564C-38FE-4465-BC62-FDCF45339C36} = {0D61C87C-0809-4CD7-9200-D78AD11A1E22}
+		{856357CE-BB26-4E6C-BAA2-B74FF8DC5734} = {0343EA18-1645-4DFB-9A9C-2D10BBA2A2CB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {036D5D82-DDA4-4600-B190-739D512F1062}
