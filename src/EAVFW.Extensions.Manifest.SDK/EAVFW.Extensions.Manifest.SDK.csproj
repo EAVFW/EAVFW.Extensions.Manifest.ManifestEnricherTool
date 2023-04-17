@@ -11,6 +11,7 @@
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/EAVFW/EAVFW.Extensions.Manifest.ManifestEnricherTool</RepositoryUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
   </PropertyGroup>
 
 	<ItemGroup>
@@ -20,7 +21,7 @@
   <ItemGroup>
      
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-	<PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.21" />
+	<PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.26" />
   </ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.31" />

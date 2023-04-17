@@ -174,43 +174,86 @@ namespace EAVFW.Extensions.Manifest.SDK
 
             foreach (var entitieP in (entities)?.Properties().ToArray() ?? Enumerable.Empty<JProperty>())
             {
-                foreach (var polyLookup in entitieP.Value.SelectToken("$.attributes").OfType<JProperty>().Where(c => c.Value.SelectToken("$.type.type")?.ToString().ToLower() == "polylookup"))
+                foreach (var polyLookup in entitieP.Value.SelectToken("$.attributes").OfType<JProperty>().Where(c => c.Value.SelectToken("$.type.type")?.ToString().ToLower() == "polylookup").ToArray())
                 {
                     var name = polyLookup.Value.SelectToken("$.type.name")?.ToString() ?? $"{entitieP.Name} {polyLookup.Name}";
                     var Key = name + " Reference";
                     var pluralName = name + " References"; //$"{entitieP.Value.SelectToken("$.displayName")} {polyLookup.Value.SelectToken("$.displayName")} References";
-
+                    var reverse = polyLookup.Value.SelectToken("$.type.reverse")?.ToObject<bool>() ?? false;
+                    var inline = polyLookup.Value.SelectToken("$.type.inline")?.ToObject<bool>() ?? false;
                     if (!entities.ContainsKey(Key))
                     { 
                         var attributes = polyLookup.Value.SelectToken("$.type.referenceTypes").ToObject<string[]>()
                             .ToDictionary(k => k, v => JToken.FromObject(new { type = new { type = "lookup", referenceType = v } }));
 
-
-
-                        //  attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true });
-                        attributes["Name"] = JToken.FromObject(new { isPrimaryField = true });
-                        entities[Key] = JToken.FromObject(new
+                        if (inline)
                         {
-                            pluralName = pluralName,
-                            attributes = attributes
-                        });
-                       
+                            foreach (var attribute in attributes)
+                            {
+                                entitieP.Value["attributes"][attribute.Key] = attribute.Value;
 
-                        SetRequiredProps(entities[Key] as JObject, Key);
+                            }
+                            polyLookup.Value["type"] = "guid";
+                         //   polyLookup.Remove();
+                        }
+                        else
+                        {
+
+
+                            //  attributes["Id"] = JToken.FromObject(new { isPrimaryKey = true });
+                            attributes["Name"] = JToken.FromObject(new { isPrimaryField = true });
+
+
+
+                            entities[Key] = JToken.FromObject(new
+                            {
+                                pluralName = pluralName,
+                                attributes = attributes
+                            });
+
+
+                            SetRequiredProps(entities[Key] as JObject, Key);
+                        }
                     }
 
-                    var entity = entities[Key] as JObject;
-                    polyLookup.Value["type"]["foreignKey"] = JToken.FromObject(new
-                    {
-                        principalTable = entity["logicalName"].ToString(),
-                        principalColumn = "id",
-                        principalNameColumn = "name",
-                        name = TrimId(polyLookup.Value.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
-                    });
-                    polyLookup.Value["type"]["referenceType"] = Key;
-                  //  polyLookup.Value["type"]["type"] = "lookup";
 
-                    await EnrichEntity(jsonraw, customizationprefix, logger, insertMerges, entity);
+
+                    if (!inline)
+                    {
+                        var entity = entities[Key] as JObject;
+                        polyLookup.Value["type"]["foreignKey"] = JToken.FromObject(new
+                        {
+                            principalTable = entity["logicalName"].ToString(),
+                            principalColumn = "id",
+                            principalNameColumn = "name",
+                            name = TrimId(polyLookup.Value.SelectToken("$.logicalName")?.ToString()) // jsonraw.SelectToken($"$.entities['{ attr["type"]["referenceType"] }'].logicalName").ToString().Replace(" ", ""),
+                        });
+                        polyLookup.Value["type"]["referenceType"] = Key;
+
+                        if (reverse)
+                        {
+                            entities[Key]["attributes"][polyLookup.Name] = JToken.FromObject(new
+                            {
+                                type = new
+                                {
+                                    type = "lookup",
+                                    referenceType = entitieP.Name
+                                }
+                            });
+
+                            // polyLookup.Remove();
+                        }
+
+
+                        //  polyLookup.Value["type"]["type"] = "lookup";
+
+                        await EnrichEntity(jsonraw, customizationprefix, logger, insertMerges, entity);
+                    }
+                    else
+                    {
+
+                        await EnrichEntity(jsonraw, customizationprefix, logger, insertMerges, entitieP.Value as JObject);
+                    }
                 }
             }
 
@@ -486,6 +529,16 @@ namespace EAVFW.Extensions.Manifest.SDK
 
                 switch (inp.ToLower())
                 {
+                    case "point":
+                        type = JToken.FromObject(new
+                        {
+                            type = "object",
+                           properties=new
+                           {
+
+                           }
+                        });
+                        return true;
                     case "binary":
                         type = JToken.FromObject(new
                         {
@@ -495,6 +548,9 @@ namespace EAVFW.Extensions.Manifest.SDK
                         return true;
                     case "datetime":
                         type = "datetime";
+                        return true;
+                    case "time":
+                        type = "time";
                         return true;
 
                     case "customer":
