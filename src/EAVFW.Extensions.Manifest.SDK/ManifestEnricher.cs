@@ -193,8 +193,8 @@ namespace EAVFW.Extensions.Manifest.SDK
                                 entitieP.Value["attributes"][attribute.Key] = attribute.Value;
 
                             }
-                            polyLookup.Value["type"] = "guid";
-                         //   polyLookup.Remove();
+                            polyLookup.Value["type"]["type"] = "polylookup";
+                            //   polyLookup.Remove();
                         }
                         else
                         {
