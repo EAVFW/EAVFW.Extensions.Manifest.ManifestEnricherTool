@@ -19,7 +19,30 @@ _Read more at [https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools](
 
 ## Install the tool globally
 
-
-
 ### Install the tool from NuGet
-Coming soon...
+
+The latest version on NuGet can be installed globally by:
+```sh
+$ dotnet tool install --global EAVFW.Extensions.Manifest.ManifestEnricherTool
+```
+_Instructions to install a specific version can be found on [NuGet](https://www.nuget.org/packages/EAVFW.Extensions.Manifest.ManifestEnricherTool)._
+
+Invoke the tool globally by:
+```
+$ eavfw-manifest
+```
+_This is contradictory to invoking the tool installed locally by `$ dotnet eavfw-manifest`._
+
+#### Update tool
+
+The tool can be updated globally by:
+```
+$ dotnet tool update --global EAVFW.Extensions.Manifest.ManifestEnricherTool
+```
+
+#### Uninstall tool
+
+The tool can be uninstalled globally by:
+```
+$ dotnet tool uninstall --global EAVFW.Extensions.Manifest.ManifestEnricherTool
+```
