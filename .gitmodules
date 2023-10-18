@@ -1,0 +1,6 @@
+[submodule "external/EAVFW.Extensions.CommandLine"]
+	path = external/EAVFW.Extensions.CommandLine
+	url = https://github.com/EAVFW/EAVFW.Extensions.CommandLine.git
+[submodule "external/EAVFramework"]
+	path = external/EAVFramework
+	url = https://github.com/EAVFW/EAVFramework.git

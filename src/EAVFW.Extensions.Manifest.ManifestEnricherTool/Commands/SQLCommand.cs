@@ -100,7 +100,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             Directory.CreateDirectory(outputDirectory);
             await File.WriteAllTextAsync(outputFile, sql);
             console.WriteLine("Written: " + Path.GetFullPath(  outputFile));
-
+            
             if(parseResult.GetValueForOption(ShouldGeneratePermissions))
                 await InitializeSystemAdministrator(parseResult, outputDirectory,model);
          }

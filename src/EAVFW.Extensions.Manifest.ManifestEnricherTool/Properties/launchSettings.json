@@ -1,0 +1,23 @@
+{
+  "profiles": {
+    "EAVFW.Extensions.Manifest.ManifestEnricherTool": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\dev\\hafnia\\loi",
+      //"workingDirectory": "C:\\dev\\kfst_vanddata",
+      //"commandLineArgs": "--path c:\\dev\\kfst_vanddata\\apps\\KFST.Vanddata.ManagementPortal\\manifest.json --customizationprefix kfst",
+      //"commandLineArgs": "install EAVFW.Extensions.SecurityModel",
+      //"commandLineArgs": "sql C:/dev/eavfwdemo/src/EAVApp.Models"
+
+      //"commandLineArgs": "sql C:/dev/kfst_vanddata/apps/KFST.Vanddata.ManagementPortal/"
+
+      //"commandLineArgs": "manifest fix-migration --project-path c:\\dev\\kfst_vanddata\\apps\\KFST.Vanddata.ManagementPortal -v 1.0.45 --schema KFST --prefix KFST --database VandData2"
+
+      // "commandLineArgs": "--path C:\\dev\\MedlemsCentralen\\src\\MC.Models\\manifest.json --customizationprefix MC"
+
+      // "commandLineArgs": "sql ./src/Hafnia.Models",
+      "commandLineArgs": "gpt review pr --project https://github.com/delegateas/WorkflowEngine.git --pr 15"
+      // "commandLineArgs": "sql ./apps/KFST.Vanddata.ManagementPortal"
+      //"commandLineArgs": "--path C:\\dev\\hafnia\\loi\\src\\Hafnia.Models\\manifest.json --customizationprefix hafnia"
+    }
+  }
+}

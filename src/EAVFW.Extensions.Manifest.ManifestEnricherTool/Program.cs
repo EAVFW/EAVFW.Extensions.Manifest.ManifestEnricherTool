@@ -3,6 +3,7 @@
 
 // See https://aka.ms/new-console-template for more information
 using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands;
+using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.GPT;
 using EAVFW.Extensions.Manifest.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
     public static class Program
     {
 
-        static ServiceCollection ConfigureServices(ServiceCollection serviceCollection)
+        static IServiceCollection ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                .AddLogging(configure =>
@@ -31,6 +32,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             serviceCollection.AddSingleton<Command, SQLCommand>();
             serviceCollection.AddSingleton<Command, ManifestCommand>();
             serviceCollection.AddSingleton<Command, CertCommand>();
+            serviceCollection.AddGPT();
+
+
             serviceCollection.AddHttpClient();
             return serviceCollection;
         }

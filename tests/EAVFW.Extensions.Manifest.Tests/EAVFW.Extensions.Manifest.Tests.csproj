@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\EAVFW.Extensions.Manifest.SDK\EAVFW.Extensions.Manifest.SDK.csproj" />
+    <ProjectReference Include="..\..\src\EAVFW.Extensions.Manifest.ManifestEnricherTool\EAVFW.Extensions.Manifest.ManifestEnricherTool.csproj" />
   </ItemGroup>
 
   <ItemGroup>
