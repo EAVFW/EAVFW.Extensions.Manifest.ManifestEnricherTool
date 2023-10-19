@@ -8,8 +8,8 @@ using EAVFW.Extensions.Manifest.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Threading.Tasks;
+using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Gzip;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 {
@@ -32,9 +32,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             serviceCollection.AddSingleton<Command, SQLCommand>();
             serviceCollection.AddSingleton<Command, ManifestCommand>();
             serviceCollection.AddSingleton<Command, CertCommand>();
+            serviceCollection.AddSingleton<Command, GzipCommand>();
             serviceCollection.AddGPT();
-
-
+            
             serviceCollection.AddHttpClient();
             return serviceCollection;
         }
