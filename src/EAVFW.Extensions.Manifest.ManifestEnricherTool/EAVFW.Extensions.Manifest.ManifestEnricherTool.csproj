@@ -48,4 +48,7 @@
 		<PackageReference Include="EAVFramework" Version="4.0.2" />
 		<PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.2.0" />
 	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\EAVFW.Extensions.Docs.Extracter\EAVFW.Extensions.Docs.Extracter.csproj" />
+	</ItemGroup>
 </Project>
