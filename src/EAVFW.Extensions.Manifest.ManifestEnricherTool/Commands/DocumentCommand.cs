@@ -20,6 +20,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         [Alias("--assembly")]
         [Description("Path for the assembly")]
         public FileInfo AssemblyPathOption { get; set; }
+        
+        [Alias("-m")]
+        [Alias("--manifest")]
+        [Description("Path for the manifest")]
+        public FileInfo ManifestPathOption { get; set; }
 
         [Alias("-p")]
         [Alias("--probing-path")]
@@ -35,6 +40,19 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         [Alias("--framework")]
         [Description("Framework confugraiton for the built assembly")]
         public string FrameworkOption { get; set; }
+        
+        
+
+        [Alias("-t")]
+        [Alias("--target")]
+        [Description("Target?")]
+        public Targets Target { get; set; }
+
+        public enum Targets
+        {
+            Plugins,
+            Wizards
+        }
 
 
         public DocumentCommand(IDocumentLogic documentLogic) : base("docs", "Generate documentation")
@@ -62,9 +80,40 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 Console.WriteLine("Assembly does not exists");
                 return 1;
             }
+            
+            switch (Target)
+            {
+                case Targets.Plugins:
+                    return await HandlePlugins();
+                case Targets.Wizards:
+                    return await HandleWizards();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            return 0;
+        }
 
+        private async Task<int> HandleWizards()
+        {
+            if (!ManifestPathOption?.Exists ?? true)
+            {
+                Console.WriteLine("Manifest does not exists");
+                return 1;
+            }
+
+            var t = documentLogic.ExtractWizardDocumentation(ManifestPathOption, new PluginInfo(RootPathOption,
+                AssemblyPathOption, ConfigurationOption,
+                FrameworkOption));
+
+            return 0;
+        }
+
+        private async Task<int> HandlePlugins()
+        {
             var plugins = documentLogic
-                .ExtractPluginDocumentation(new PluginInfo(RootPathOption, AssemblyPathOption, ConfigurationOption, FrameworkOption))
+                .ExtractPluginDocumentation(new PluginInfo(RootPathOption, AssemblyPathOption, ConfigurationOption,
+                    FrameworkOption))
                 .ToArray();
 
             var jsonString = JsonSerializer.Serialize(plugins, new JsonSerializerOptions
@@ -72,7 +121,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 WriteIndented = true
             });
             await File.WriteAllTextAsync("docs.json", jsonString);
-            
+
             var groups = plugins.GroupBy(x => x.Entity!.Name);
 
             Console.WriteLine("# Plugins ");
@@ -84,7 +133,6 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                     Console.WriteLine(pluginDocumentation.ToString());
                 }
             }
-
 
             return 0;
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 
 namespace EAVFW.Extensions.Docs.Extracter
 {
@@ -9,7 +10,17 @@ namespace EAVFW.Extensions.Docs.Extracter
         /// created during a build.
         ///
         /// Remember to enable GenerateDocumentationFile for the project.
+        /// <param name="pluginInfo"></param>
         /// </summary>
         IEnumerable<PluginDocumentation> ExtractPluginDocumentation(PluginInfo pluginInfo);
+
+        /// <summary>
+        /// Extract Wizards from the given Manifest and generate documentation based on manifest metadata and workflow
+        /// CLR types and Actions
+        /// </summary>
+        /// <param name="manifestFile"></param>
+        /// <param name="pluginInfo"></param>
+        /// <returns></returns>
+        IEnumerable<string> ExtractWizardDocumentation(FileInfo manifestFile, PluginInfo pluginInfo);
     }
 }

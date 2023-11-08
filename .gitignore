@@ -11,3 +11,4 @@ node_modules
 /.github/workflows/package-lock.json
 /artifacts
 *.csproj.user
+.idea
