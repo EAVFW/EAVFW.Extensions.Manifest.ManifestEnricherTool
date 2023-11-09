@@ -20,6 +20,8 @@
     <PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.26" />
     
     <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
+    
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Semver" Version="2.2.0" />
   </ItemGroup>

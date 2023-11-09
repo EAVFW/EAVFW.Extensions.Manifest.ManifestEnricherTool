@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
@@ -171,34 +172,55 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 SqlAuthenticationProvider.SetProvider(SqlAuthenticationMethod.ActiveDirectoryServicePrincipal, new AccessTokenProvider(token));
             }
             // Use your own server, database, app ID, and secret.
-            string ConnectionString = $@"Server={server}; Authentication=Active Directory Service Principal;Command Timeout=300; Encrypt=True; Database={database}; User Id={clientid}; Password={clientSecret}";
+            string ConnectionString =
+                !string.IsNullOrEmpty(token + clientid + clientSecret) ?
+                $@"Server={server}; Authentication=Active Directory Service Principal;Command Timeout=300; Encrypt=True; Database={database}; User Id={clientid}; Password={clientSecret}" :
+                $@"Server={server}; Authentication=Active Directory Device Code Flow;Command Timeout=300; Encrypt=True; Database={database};Connect Timeout=180;";
             //var files = new[] { @"C:\dev\MedlemsCentralen\obj\dbinit\init.sql", @"C:\dev\MedlemsCentralen\obj\dbinit\init-systemadmin.sql" };
-            var replacements = _replacements.ToDictionary(k => k.Substring(0, k.IndexOf('=')), v => v.Substring(v.IndexOf('=') + 1));
+
+            Dictionary<string, string> replacements = ExtractReplacemets(_replacements);
 
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
-      
+
                 await conn.OpenAsync();
-                foreach(var file in files)
+                foreach (var file in files)
                 {
                     var cmdText = File.ReadAllText(file);
-                    foreach(var r in replacements)
+                    foreach (var r in replacements)
                     {
                         cmdText = cmdText.Replace($"$({r.Key})", r.Value);
                     }
 
 
-                   
+                    var stack = new Stack<SqlTransaction>();
 
-                    foreach (var sql in cmdText.Split("GO"))
+                    //  await ExecuteSQL(conn, "BEGIN TRANSACTION");
+
+                    foreach (var sql in cmdText.Split("GO")
+                        .Where(s=>!string.IsNullOrEmpty(s)))
                     {
+
+                        if(string.Equals( sql , "BEGIN TRANSACTION;", StringComparison.OrdinalIgnoreCase)){
+                            stack.Push(conn.BeginTransaction());
+                            continue;
+                        }
+
+                        if (string.Equals(sql, "COMMIT;", StringComparison.OrdinalIgnoreCase))
+                        {
+                            stack.Pop().Commit();
+                            
+                            continue;
+                        }
+
                         using var cmd = conn.CreateCommand();
-                      
+
                         cmd.CommandText = sql.Trim();
-                        //  await context.Context.Database.ExecuteSqlRawAsync(sql);
+                       
 
                         if (!string.IsNullOrEmpty(cmd.CommandText))
                         {
+                            //Console.WriteLine("Executing: " + cmd.CommandText);
                             var r = await cmd.ExecuteNonQueryAsync();
                             Console.WriteLine("Rows changed: " + r);
                         }
@@ -207,11 +229,31 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
 
 
-                  
-                     
+
+
                 }
-              
+
             }
+        }
+
+        private static Dictionary<string, string> ExtractReplacemets(string[] _replacements)
+        {
+            try
+            {
+                return _replacements.ToDictionary(k => k.Substring(0, k.IndexOf('=')), v => v.Substring(v.IndexOf('=') + 1));
+            }catch(Exception ex)
+            {
+                Console.WriteLine(string.Join("\n", _replacements));
+                throw;
+            }
+        }
+
+        private static async Task ExecuteSQL(SqlConnection conn, string sql)
+        {
+            using var cmd = conn.CreateCommand();
+
+            cmd.CommandText = sql;
+            var r = await cmd.ExecuteNonQueryAsync();
         }
     }
 }
