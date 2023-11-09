@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -26,6 +25,7 @@ namespace EAVFW.Extensions.Docs.Extracter
         [JsonPropertyName("ribbon")] public string Ribbon { get; set; }
     }
 
+    [JsonConverter(typeof(TabConverter))]
     public class Tab
     {
         [JsonPropertyName("columns")] public JsonElement Columns { get; set; }
@@ -62,28 +62,6 @@ namespace EAVFW.Extensions.Docs.Extracter
         public bool IsBool { get; }
     }
 
-
-    public class TabConverter : JsonConverter<StringOrBoolean>
-    {
-        public override StringOrBoolean Read(ref Utf8JsonReader reader, Type typeToConvert,
-            JsonSerializerOptions options)
-        {
-            return reader.TokenType switch
-            {
-                JsonTokenType.String => new StringOrBoolean(reader.GetString() ?? ""),
-                JsonTokenType.False => new StringOrBoolean(false),
-                JsonTokenType.True => new StringOrBoolean(true),
-                _ => new StringOrBoolean()
-            };
-        }
-
-        public override void Write(Utf8JsonWriter writer, StringOrBoolean value, JsonSerializerOptions options)
-        {
-            if (value.IsBool)
-                writer.WriteBooleanValue(value.BooleanValue);
-            writer.WriteStringValue(value.StringValue);
-        }
-    }
 
     public class Transition
     {

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using EAVFW.Extensions.Docs.Extracter;
+using EAVFW.Extensions.Docs.Generator;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
@@ -20,7 +21,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         [Alias("--assembly")]
         [Description("Path for the assembly")]
         public FileInfo AssemblyPathOption { get; set; }
-        
+
         [Alias("-m")]
         [Alias("--manifest")]
         [Description("Path for the manifest")]
@@ -40,8 +41,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         [Alias("--framework")]
         [Description("Framework confugraiton for the built assembly")]
         public string FrameworkOption { get; set; }
-        
-        
+
 
         [Alias("-t")]
         [Alias("--target")]
@@ -80,7 +80,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 Console.WriteLine("Assembly does not exists");
                 return 1;
             }
-            
+
             switch (Target)
             {
                 case Targets.Plugins:
@@ -90,7 +90,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
             return 0;
         }
 
@@ -118,21 +118,13 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
             var jsonString = JsonSerializer.Serialize(plugins, new JsonSerializerOptions
             {
+                Converters = { new PluginRegistrationAttributeConverter() },
                 WriteIndented = true
             });
             await File.WriteAllTextAsync("docs.json", jsonString);
 
-            var groups = plugins.GroupBy(x => x.Entity!.Name);
-
-            Console.WriteLine("# Plugins ");
-            foreach (var group in groups)
-            {
-                Console.WriteLine($"## {group.FirstOrDefault()?.Entity?.Name}");
-                foreach (var pluginDocumentation in group)
-                {
-                    Console.WriteLine(pluginDocumentation.ToString());
-                }
-            }
+            var writer = new PluginDocumentationToReadMe();
+            await writer.WriteReadMe(plugins);
 
             return 0;
         }

@@ -46,6 +46,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Manifest.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EAVFW.Extensions.Docs.Extracter", "src\EAVFW.Extensions.Docs.Extracter\EAVFW.Extensions.Docs.Extracter.csproj", "{432042AB-6A78-4ED7-B8AC-73B047F6630F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EAVFW.Extensions.Docs.Generator", "src\EAVFW.Extensions.Docs.Generator\EAVFW.Extensions.Docs.Generator.csproj", "{71FCB365-F4AE-4578-BF86-B4A3C278B6B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{432042AB-6A78-4ED7-B8AC-73B047F6630F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{432042AB-6A78-4ED7-B8AC-73B047F6630F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{432042AB-6A78-4ED7-B8AC-73B047F6630F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71FCB365-F4AE-4578-BF86-B4A3C278B6B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71FCB365-F4AE-4578-BF86-B4A3C278B6B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71FCB365-F4AE-4578-BF86-B4A3C278B6B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71FCB365-F4AE-4578-BF86-B4A3C278B6B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,6 +88,7 @@ Global
 		{2F30C24A-421A-4309-9F07-99668EA70C25} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 		{3BEF0769-ABD1-4D34-8004-C98DE9FB0339} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 		{432042AB-6A78-4ED7-B8AC-73B047F6630F} = {0D61C87C-0809-4CD7-9200-D78AD11A1E22}
+		{71FCB365-F4AE-4578-BF86-B4A3C278B6B1} = {0D61C87C-0809-4CD7-9200-D78AD11A1E22}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {036D5D82-DDA4-4600-B190-739D512F1062}

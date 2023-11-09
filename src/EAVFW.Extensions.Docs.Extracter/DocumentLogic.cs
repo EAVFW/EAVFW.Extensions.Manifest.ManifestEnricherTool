@@ -145,11 +145,7 @@ namespace EAVFW.Extensions.Docs.Extracter
                 if (!property.NameEquals("entities") || property.Value.ValueKind != JsonValueKind.Object) continue;
 
                 var localEntities =
-                    JsonSerializer.Deserialize<Dictionary<string, Entity>>(property.Value.GetRawText(),
-                        new JsonSerializerOptions
-                        {
-                            Converters = { new TabConverter() }
-                        });
+                    JsonSerializer.Deserialize<Dictionary<string, Entity>>(property.Value.GetRawText());
 
                 if (localEntities == null) return;
 

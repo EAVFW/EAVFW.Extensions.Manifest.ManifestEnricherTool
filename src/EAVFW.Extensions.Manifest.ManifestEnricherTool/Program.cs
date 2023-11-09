@@ -29,7 +29,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                .AddManifestSDK<SQLClientParameterGenerator>()              
                .AddSingleton<App>();
 
-            serviceCollection.AddSingleton<IDocumentLogic, DocumentLogic>();
+            serviceCollection.AddDocument();
 
             serviceCollection.AddSingleton<Command, InstallCommand>();
             serviceCollection.AddSingleton<Command, SQLCommand>();
