@@ -96,11 +96,17 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                     sid += string.Format("{0:X2}", @byte);
                 }
 
-                
-                cmd.CommandText = $@" CREATE USER [{user}] WITH DEFAULT_SCHEMA=[dbo], SID = {sid}, TYPE = E;
-                                    ALTER ROLE db_datareader ADD MEMBER [{user}];
-                                    ALTER ROLE db_datawriter ADD MEMBER [{user}];
-                                    ALTER ROLE db_ddladmin ADD MEMBER [{user}];";
+
+                cmd.CommandText = $@"IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name ='{user}')
+                                     BEGIN
+                                        CREATE USER [{user}] WITH DEFAULT_SCHEMA=[dbo], SID = {sid}, TYPE = E;
+                                     END
+                                     IF IS_ROLEMEMBER('db_owner','$ServicePrincipalName') = 0
+                                     BEGIN
+                                        ALTER ROLE db_owner ADD MEMBER [{user}]
+                                     END
+                                     GRANT CONTROL ON DATABASE::[{database}] TO [{user}];";
+                                     
 
                 var r = await cmd.ExecuteNonQueryAsync();
                 Console.WriteLine("Rows changed: " + r);
