@@ -55,6 +55,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             this.manifestPermissionGenerator = manifestPermissionGenerator ?? throw new ArgumentNullException(nameof(manifestPermissionGenerator));
 
             Add(new SQLApplyCommand());
+            Add(new SQLUserCommand());
             
         }
         private async Task Run(ParseResult parseResult, IConsole console)
