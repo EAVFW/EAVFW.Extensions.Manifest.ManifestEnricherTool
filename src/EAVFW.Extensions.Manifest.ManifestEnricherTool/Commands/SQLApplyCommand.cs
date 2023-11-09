@@ -9,10 +9,34 @@ using System.Threading.Tasks;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
+    /// <summary>
+    /// Example demonstrating creating a custom device code flow authentication provider and attaching it to the driver.
+    /// This is helpful for applications that wish to override the Callback for the Device Code Result implemented by the SqlClient driver.
+    /// </summary>
+    public class AccessTokenProvider : SqlAuthenticationProvider
+    {
+        private readonly string token;
+
+        public AccessTokenProvider(string token)
+        {
+            this.token = token;
+        }
+        public override async Task<SqlAuthenticationToken> AcquireTokenAsync(SqlAuthenticationParameters parameters)
+        {
+            
+            return new SqlAuthenticationToken(token, DateTime.UtcNow.AddHours(1));
+        }
+
+        public override bool IsSupported(SqlAuthenticationMethod authenticationMethod) => authenticationMethod.Equals(SqlAuthenticationMethod.ActiveDirectoryServicePrincipal);
+
+        
+    }
+
     public class SQLApplyCommand : Command
     {
         public Option<string> ClientSecret = new Option<string>("ClientSecret", "");
         public Option<string> ClientId = new Option<string>("ClientId", "");
+        public Option<string> Token = new Option<string>("Token", "");
         public Option<string> Server = new Option<string>("Server", "");
         public Option<string> DatabaseName = new Option<string>("DatabaseName", "");
 
@@ -40,7 +64,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
             Files.AddAlias("-i");
             Add(Files);
-
+            Token.AddAlias("--token");
+            Add(Token);
 
             Files.AllowMultipleArgumentsPerToken = true;
 
@@ -54,10 +79,15 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             var clientSecret = arg1.GetValueForOption(ClientSecret);
             var server = arg1.GetValueForOption(Server);
             var database = arg1.GetValueForOption(DatabaseName);
+            var token = arg1.GetValueForOption(Token);
 
             var files = arg1.GetValueForOption(Files);
             var _replacements = arg1.GetValueForOption(Replacements);
 
+            if (!string.IsNullOrEmpty(token))
+            {
+                SqlAuthenticationProvider.SetProvider(SqlAuthenticationMethod.ActiveDirectoryServicePrincipal, new AccessTokenProvider(token));
+            }
             // Use your own server, database, app ID, and secret.
             string ConnectionString = $@"Server={server}; Authentication=Active Directory Service Principal;Command Timeout=300; Encrypt=True; Database={database}; User Id={clientid}; Password={clientSecret}";
             //var files = new[] { @"C:\dev\MedlemsCentralen\obj\dbinit\init.sql", @"C:\dev\MedlemsCentralen\obj\dbinit\init-systemadmin.sql" };
