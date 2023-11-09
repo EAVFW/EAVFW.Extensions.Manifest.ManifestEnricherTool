@@ -87,22 +87,25 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
           
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
+                // var sid = "0x";// + string.Format("{0:X2}", Guid.Parse("3438c38d-c721-4373-943c-69b0dfe25462"));
+                var sid = "0x";
+                foreach (var @byte in Guid.Parse(userid).ToByteArray())
+                {
+                    sid += string.Format("{0:X2}", @byte);
+                }
+               
+
                 await conn.OpenAsync();
 
                 var cmd = conn.CreateCommand();
 
-                // var sid = "0x";// + string.Format("{0:X2}", Guid.Parse("3438c38d-c721-4373-943c-69b0dfe25462"));
-                var sid = "0x";
-                foreach (var @byte in Guid.Parse(userid).ToByteArray()) {
-                    sid += string.Format("{0:X2}", @byte);
-                }
-
+              
 
                 cmd.CommandText = $@"IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name ='{user}')
                                      BEGIN
                                         CREATE USER [{user}] WITH DEFAULT_SCHEMA=[dbo], SID = {sid}, TYPE = E;
                                      END
-                                     IF IS_ROLEMEMBER('db_owner','$ServicePrincipalName') = 0
+                                     IF IS_ROLEMEMBER('db_owner','{user}') = 0
                                      BEGIN
                                         ALTER ROLE db_owner ADD MEMBER [{user}]
                                      END
