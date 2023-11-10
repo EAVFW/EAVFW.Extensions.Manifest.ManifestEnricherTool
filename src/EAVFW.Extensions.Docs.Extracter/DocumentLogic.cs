@@ -7,6 +7,7 @@ using System.Runtime.Loader;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EAVFramework.Plugins;
+using EAVFW.Extensions.Manifest.SDK;
 
 namespace EAVFW.Extensions.Docs.Extracter
 {
@@ -96,7 +97,7 @@ namespace EAVFW.Extensions.Docs.Extracter
             var jsonManifest = JsonDocument.ParseAsync(openStream).Result;
 
             // Find Wizards
-            var simpleManifest = new Dictionary<string, Entity>();
+            var simpleManifest = new Dictionary<string, EntityDefinition>();
             ExtractEntitiesWithWizards(jsonManifest.RootElement, simpleManifest);
 
 
@@ -136,7 +137,7 @@ namespace EAVFW.Extensions.Docs.Extracter
             return new List<string>();
         }
 
-        private void ExtractEntitiesWithWizards(JsonElement element, IDictionary<string, Entity> entities)
+        private void ExtractEntitiesWithWizards(JsonElement element, IDictionary<string, EntityDefinition> entities)
         {
             if (element.ValueKind != JsonValueKind.Object) return;
 
@@ -145,7 +146,7 @@ namespace EAVFW.Extensions.Docs.Extracter
                 if (!property.NameEquals("entities") || property.Value.ValueKind != JsonValueKind.Object) continue;
 
                 var localEntities =
-                    JsonSerializer.Deserialize<Dictionary<string, Entity>>(property.Value.GetRawText());
+                    JsonSerializer.Deserialize<Dictionary<string, EntityDefinition>>(property.Value.GetRawText());
 
                 if (localEntities == null) return;
 

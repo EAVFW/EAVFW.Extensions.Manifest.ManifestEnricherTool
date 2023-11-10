@@ -1,25 +1,18 @@
 ﻿using EAVFramework;
 using EAVFW.Extensions.Manifest.SDK;
-using Microsoft.Azure.Documents.Spatial;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using NetTopologySuite.Geometries;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Point = NetTopologySuite.Geometries.Point;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {

@@ -123,8 +123,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             });
             await File.WriteAllTextAsync("docs.json", jsonString);
 
-            var writer = new PluginDocumentationToReadMe();
-            await writer.WriteReadMe(plugins);
+            using var writer = new PluginDocumentationToReadMe();
+            await writer.WriteTables(ManifestPathOption);
+            await writer.WritePlugins(plugins);
 
             return 0;
         }

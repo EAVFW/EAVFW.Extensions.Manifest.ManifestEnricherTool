@@ -1,49 +1,84 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using EAVFW.Extensions.Docs.Extracter;
-using Microsoft.AspNetCore.DataProtection;
-using Sprache;
+using EAVFW.Extensions.Manifest.SDK;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace EAVFW.Extensions.Docs.Generator
 {
-    public class PluginDocumentationToReadMe
+    public class PluginDocumentationToReadMe : IDisposable
     {
-        public async Task WriteReadMe(IEnumerable<PluginDocumentation> pluginDocumentations)
+        private readonly StreamWriter _writer;
+        private readonly Dictionary<string, string> _logicalNameLookup = new();
+        private readonly TransformXmlTag _transformXmlTag;
+
+        public PluginDocumentationToReadMe(
+            string path = "/Users/thyge/Documents/Obsidian Vault/Delegate Lava-Stone/Delegate/documentation.md")
         {
-            await using var writer = new StreamWriter("documentation.md");
+            _transformXmlTag = new TransformXmlTag();
+            _writer = new StreamWriter(path);
+        }
 
-            var groups = pluginDocumentations.GroupBy(x => x.Entity!.Name);
-            await writer.WriteLineAsync("# Plugins ");
-            foreach (var group in groups)
+        public async Task WriteTables(FileInfo manifest)
+        {
+            var manifestObject = await JsonSerializer.DeserializeAsync<ManifestDefinition>(manifest.OpenRead());
+
+            await _writer.WriteLineAsync("## Tables:\n");
+
+            var t = new DefaultSchemaNameManager();
+
+            Debug.Assert(manifestObject != null, nameof(manifestObject) + " != null");
+            foreach (var (key, value) in manifestObject.Entities)
             {
-                await writer.WriteLineAsync($"## {group.FirstOrDefault()?.Entity?.Name}");
-                foreach (var pluginDocumentation in group)
-                {
-                    await writer.WriteLineAsync($"### {pluginDocumentation.Name}");
-                    await writer.WriteLineAsync(
-                        $"Entity:\t[{pluginDocumentation.Entity?.Name}](#{pluginDocumentation.Entity?.Name})");
-                    await writer.WriteLineAsync(
-                        $"Context:\t[{pluginDocumentation.Entity?.Name}](#{pluginDocumentation.Entity?.Name})");
-                    await writer.WriteLineAsync("Triggers:");
-                    await writer.WriteLineAsync("| Operation | Execution | Mode | Order |");
-                    await writer.WriteLineAsync("|---|---|---|:-:|");
-                    foreach (var reg in pluginDocumentation.PluginRegistrations.OrderBy(x => x.Order))
-                    {
-                        await writer.WriteLineAsync($"|{reg.Operation}|{reg.Execution}|{reg.Mode}|{reg.Order}|");
-                    }
+                _logicalNameLookup[t.ToSchemaName(key)] = key;
 
-                    await writer.WriteLineAsync("\n**Summary:**");
-
-                    await writer.WriteLineAsync(SanitizeSummary(pluginDocumentation.Summary));
-
-                    await writer.WriteLineAsync();
-                }
+                await _writer.WriteLineAsync($"### {key}");
+                await _writer.WriteLineAsync($"Logical name: `{t.ToSchemaName(key)}`");
+                await _writer.WriteLineAsync($"Plural name: {value.PluralName}");
+                await _writer.WriteLineAsync($"Description: {value.Description}");
+                await _writer.WriteLineAsync("Attributes:");
             }
         }
 
-        private static string SanitizeSummary(string summary)
+        public async Task WritePlugins(IEnumerable<PluginDocumentation> pluginDocumentations)
+        {
+            var groups = pluginDocumentations.GroupBy(x => x.Entity!.Name);
+            await _writer.WriteLineAsync("## Plugins ");
+            foreach (var group in groups)
+            {
+                await _writer.WriteLineAsync($"### {group.FirstOrDefault()?.Entity?.Name}");
+                foreach (var pluginDocumentation in group)
+                {
+                    await _writer.WriteLineAsync($"#### {pluginDocumentation.Name}");
+                    await _writer.WriteLineAsync(
+                        $"Entity:\t[{pluginDocumentation.Entity?.Name}](#{pluginDocumentation.Entity?.Name})");
+                    await _writer.WriteLineAsync(
+                        $"Context:\t[{pluginDocumentation.Entity?.Name}](#{pluginDocumentation.Entity?.Name})");
+                    await _writer.WriteLineAsync("Triggers:\n");
+                    await _writer.WriteLineAsync("| Operation | Execution | Mode | Order |");
+                    await _writer.WriteLineAsync("|---|---|---|:-:|");
+                    foreach (var reg in pluginDocumentation.PluginRegistrations.OrderBy(x => x.Order))
+                    {
+                        await _writer.WriteLineAsync($"|{reg.Operation}|{reg.Execution}|{reg.Mode}|{reg.Order}|");
+                    }
+
+                    await _writer.WriteLineAsync("\n**Summary:**");
+
+                    await _writer.WriteLineAsync(SanitizeSummary(pluginDocumentation.Summary));
+
+                    await _writer.WriteLineAsync();
+                }
+            }
+        }
+        
+        // public async Task WriteWizards()
+            
+
+        private string SanitizeSummary(string summary)
         {
             if (string.IsNullOrWhiteSpace(summary)) return summary;
 
@@ -51,39 +86,37 @@ namespace EAVFW.Extensions.Docs.Generator
 
             lines = lines.Where(x => !string.IsNullOrWhiteSpace(x));
             lines = lines.Select(x => x.Trim());
-            lines = lines.Select(x => ToMarkDownLink.Parse(x));
-            
+            lines = lines.Select(x => _transformXmlTag.TransformString(x, TransformTag));
 
-            return string.Join("", lines);
+            return string.Join(" ", lines);
         }
 
-        private static readonly Parser<string> Text = Parse.CharExcept('<').Many().Text();
+        /// <summary>
+        /// Function i expression motoren
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="properties"></param>
+        /// <returns></returns>
+        private string TransformTag(string tag, Dictionary<string, string> properties)
+        {
+            if (tag != "see")
+                return tag;
 
-        private static readonly Parser<string> Value =
-            Parse.AnyChar.Except(Parse.Char('\"')).Many().Text();
-        
-        private static readonly Parser<KeyValuePair<string, string>> Property =
-            from key in Parse.LetterOrDigit.Or(Parse.Char('-')).Many().Text()
-            from eq in Parse.Char('=')
-            from value in Parse.AnyChar.Except(Parse.Char('\"')).Many().Contained(Parse.Char('\"'), Parse.Char('\"')).Text()
-            select new KeyValuePair<string, string>(key, value);
+            var target = properties["cref"];
 
-        private static readonly Parser<Dictionary<string, string>> Properties =
-            from properties in Property.DelimitedBy(Parse.Char(' '))
-            select properties.ToDictionary(x => x.Key, x => x.Value);
+            var key = target.Split(':').Last().Split('.').Last();
 
-        private static readonly Parser<string> LinkReplace =
-            from s in Parse.String("<see")
-            from _ in Parse.WhiteSpace.Many()
-            from props in Properties
-            from __ in Parse.WhiteSpace.Many()
-            from d in Parse.String("/>")
-            select $"[{props["cref"]}](#{props["cref"]})";
+            _logicalNameLookup.TryGetValue(key, out var value);
 
-        private static readonly Parser<string> ToMarkDownLink =
-            from s in Text.Or(LinkReplace).Many()
-            select string.Join("", s);
-        
-        
+            return $"[{value ?? key}](#{key})";
+        }
+
+
+        public async void Dispose()
+        {
+            await _writer.FlushAsync();
+            await _writer.DisposeAsync();
+            GC.SuppressFinalize(this);
+        }
     }
 }
