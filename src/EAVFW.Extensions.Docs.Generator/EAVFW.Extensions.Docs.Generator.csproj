@@ -9,4 +9,10 @@
       <ProjectReference Include="..\EAVFW.Extensions.Docs.Extracter\EAVFW.Extensions.Docs.Extracter.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="EAVFW.Extensions.Manifest.SDK">
+        <HintPath>..\EAVFW.Extensions.Manifest.ManifestEnricherTool\bin\Debug\net8.0\EAVFW.Extensions.Manifest.SDK.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

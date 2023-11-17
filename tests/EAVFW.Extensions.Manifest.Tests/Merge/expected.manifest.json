@@ -1,0 +1,67 @@
+{
+  "variables": {
+    "Audit": {
+      "moduleSource": "manifest.json",
+      "moduleLocation": "variables",
+      "CreatedOn": {
+        "moduleSource": "manifest.json",
+        "moduleLocation": "variables",
+        "type": "DateTime"
+      }
+    },
+    "Administrative": {
+      "moduleSource": "manifest.json",
+      "moduleLocation": "variables",
+      "tab": "TAB_Administrative"
+    }
+  },
+  "entities": {
+    "System User": {
+      "pluralName": "System Users",
+//      "moduleSource": "manifest.json",
+      "moduleSource": "manifest.component.json",
+      "moduleLocation": "manifest",
+      "attributes": {
+        "Email": {
+          "type": "Text",
+          "moduleSource": "manifest.json",
+          "moduleLocation": "entity"
+        },
+        "Name": {
+          "type": "Text",
+          "moduleSource": "manifest.json",
+          "moduleLocation": "entity"
+        },
+        "Organization": {
+          "type": "Text",
+          "moduleSource": "manifest.component.json",
+          "moduleLocation": "entity"
+        }
+      }
+    },
+    "Identity": {
+      "pluralName": "Identities",
+      "moduleSource": "manifest.json",
+      "moduleLocation": "manifest",
+      "attributes": {
+        "Name": {
+          "type": "Text",
+          "moduleSource": "manifest.json",
+          "moduleLocation": "entity"
+        }
+      }
+    },
+    "Component Table": {
+      "pluralName": "Component Tables",
+      "moduleSource": "manifest.component.json",
+      "moduleLocation": "manifest",
+      "attributes": {
+        "Name": {
+          "type": "Text",
+          "moduleSource": "manifest.component.json",
+          "moduleLocation": "entity"
+        }
+      }
+    }
+  }
+}

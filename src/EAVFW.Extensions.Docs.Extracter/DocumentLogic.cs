@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Security.Principal;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EAVFramework.Plugins;
 using EAVFW.Extensions.Manifest.SDK;
+using WorkflowEngine.Core;
 
 namespace EAVFW.Extensions.Docs.Extracter
 {
@@ -80,19 +82,17 @@ namespace EAVFW.Extensions.Docs.Extracter
         }
 
         /// <inheritdoc/>
-        public IEnumerable<string> ExtractWizardDocumentation(FileInfo manifestFile, PluginInfo pluginInfo)
+        public Dictionary<string, EntityDefinition> ExtractWizardDocumentation(FileInfo manifestFile,
+            PluginInfo pluginInfo)
         {
             var assembly = LoadAssembly(pluginInfo);
 
             // Preloading types to easily query for documentation
-            var workflows =
-                from type in assembly.GetTypes()
-                //     where type.IsAbstract && typeof(Workflow).IsAssignableFrom(type)
-                select type;
+            var workflows = assembly.GetTypes()
+                .Where(type => !type.IsAbstract && !type.IsInterface && typeof(IWorkflow).IsAssignableFrom(type))
+                .ToDictionary(x => x.Name, x => x);
 
             // Load manifest
-
-
             using var openStream = manifestFile.OpenRead();
             var jsonManifest = JsonDocument.ParseAsync(openStream).Result;
 
@@ -100,41 +100,47 @@ namespace EAVFW.Extensions.Docs.Extracter
             var simpleManifest = new Dictionary<string, EntityDefinition>();
             ExtractEntitiesWithWizards(jsonManifest.RootElement, simpleManifest);
 
+            var tabs =
+                (from entity in simpleManifest
+                    from wizard in entity.Value.Wizards
+                    from _tabs in wizard.Value.Tabs
+                    select _tabs).AsEnumerable();
 
             // Glorified for loop?
             var tabsWithWorkflows =
-                from entity in simpleManifest
-                from wizard in entity.Value.Wizards
-                from tabs in wizard.Value.Tabs
-                where tabs.Value.OnTransitionOut?.Workflow != null && tabs.Value.OnTransitionIn?.Workflow != null
-                select tabs.Value;
+                from tab in tabs
+                where tab.Value.OnTransitionOut?.Workflow != null || tab.Value.OnTransitionIn?.Workflow != null
+                select tab;
 
-            foreach (var tabsWithWorkflow in tabsWithWorkflows)
+            foreach (var (key, value) in tabsWithWorkflows)
             {
-                if (!string.IsNullOrWhiteSpace(tabsWithWorkflow?.OnTransitionOut?.Workflow))
+                if (!string.IsNullOrWhiteSpace(value?.OnTransitionIn?.Workflow) &&
+                    workflows.TryGetValue(value.OnTransitionIn.Workflow, out var type1))
                 {
-                    var workflow = tabsWithWorkflow.OnTransitionOut.Workflow!;
-                    // look for workflow in types?
-                    Console.WriteLine(workflow);
+                    value.OnTransitionIn.AdditionalData["x-workflowSummary"] = type1.GetDocumentation();
+                }
+
+                if (!string.IsNullOrWhiteSpace(value?.OnTransitionOut?.Workflow) &&
+                    workflows.TryGetValue(value.OnTransitionOut.Workflow, out var type2))
+                {
+                    value.OnTransitionOut.AdditionalData["x-workflowSummary"] = type2.GetDocumentation();
                 }
             }
+            
+            var actionsWithWorkflows =
+                from tab in tabs
+                where tab.Value.Actions != null
+                from action in tab.Value.Actions
+                where action.Value.Workflow != null
+                select action;
 
-            foreach (var (key, wizard) in simpleManifest)
+            foreach (var (key, value) in actionsWithWorkflows)
             {
-                var t = JsonSerializer.Serialize(wizard, new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                });
-                Console.WriteLine(t);
+                if (workflows.TryGetValue(value.Workflow, out var type))
+                    value.AdditionalFields["x-workflowSummary"] = type.GetDocumentation();
             }
 
-
-            // Generate Wizard object
-
-
-            // Return Wizard object
-            return new List<string>();
+            return simpleManifest;
         }
 
         private void ExtractEntitiesWithWizards(JsonElement element, IDictionary<string, EntityDefinition> entities)

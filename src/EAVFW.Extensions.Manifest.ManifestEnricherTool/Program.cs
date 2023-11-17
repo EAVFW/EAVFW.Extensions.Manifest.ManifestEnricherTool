@@ -38,6 +38,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             serviceCollection.AddSingleton<Command, GzipCommand>();
             serviceCollection.AddSingleton<Command, DocumentCommand>();
             serviceCollection.AddGPT();
+
+            serviceCollection.AddTransient<IManifestMerger, ManifestMerger>();
+            serviceCollection.AddTransient<IModuleMetadataEnricher, ModuleMetadataEnricher >();
             
             serviceCollection.AddHttpClient();
             return serviceCollection;

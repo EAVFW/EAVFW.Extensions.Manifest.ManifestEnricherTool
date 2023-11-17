@@ -16,7 +16,6 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
     {
         private readonly IDocumentLogic documentLogic;
 
-
         [Alias("-a")]
         [Alias("--assembly")]
         [Description("Path for the assembly")]
@@ -24,7 +23,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
         [Alias("-m")]
         [Alias("--manifest")]
-        [Description("Path for the manifest")]
+        [Description("Path for the enriched manifest")]
         public FileInfo ManifestPathOption { get; set; }
 
         [Alias("-p")]
@@ -37,11 +36,19 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         [Description("Configuration for the built assembly")]
         public string ConfigurationOption { get; set; }
 
+        [Alias("--component")]
+        [Description("Component to generate documentation. E.g., `mainfest.component.json`")]
+        public string ComponentOption { get; set; }
+
         [Alias("-f")]
         [Alias("--framework")]
         [Description("Framework confugraiton for the built assembly")]
         public string FrameworkOption { get; set; }
 
+        [Alias("-o")]
+        [Alias("--output")]
+        [Description("Output directory for genreated documentation source files")]
+        public DirectoryInfo OutputOption { get; set; }
 
         [Alias("-t")]
         [Alias("--target")]
@@ -53,7 +60,6 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             Plugins,
             Wizards
         }
-
 
         public DocumentCommand(IDocumentLogic documentLogic) : base("docs", "Generate documentation")
         {
@@ -90,8 +96,6 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            return 0;
         }
 
         private async Task<int> HandleWizards()
@@ -102,9 +106,29 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 return 1;
             }
 
-            var t = documentLogic.ExtractWizardDocumentation(ManifestPathOption, new PluginInfo(RootPathOption,
-                AssemblyPathOption, ConfigurationOption,
-                FrameworkOption));
+            var entityDefinitions = documentLogic.ExtractWizardDocumentation(
+                ManifestPathOption,
+                new PluginInfo(RootPathOption,
+                    AssemblyPathOption,
+                    ConfigurationOption,
+                    FrameworkOption));
+
+            var basePath = new DirectoryInfo(CalculateFullPath("wizards"));
+
+            if(!basePath.Exists)
+                basePath.Create();
+            
+            foreach (var (key, value) in entityDefinitions)
+            {
+                var fileName = Path.Combine(basePath.FullName, $"{key}.json");
+
+                await using var createStream = File.Create(fileName);
+                await JsonSerializer.SerializeAsync(createStream, value, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+                await createStream.DisposeAsync();
+            }
 
             return 0;
         }
@@ -121,13 +145,21 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 Converters = { new PluginRegistrationAttributeConverter() },
                 WriteIndented = true
             });
-            await File.WriteAllTextAsync("docs.json", jsonString);
 
-            using var writer = new PluginDocumentationToReadMe();
-            await writer.WriteTables(ManifestPathOption);
-            await writer.WritePlugins(plugins);
+            var path = CalculateFullPath("plugins.json");
+            await File.WriteAllTextAsync(path, jsonString);
 
             return 0;
+        }
+
+        private string CalculateFullPath(string path)
+        {
+            if (OutputOption != null)
+            {
+                path = Path.Combine(OutputOption.FullName, path);
+            }
+
+            return path;
         }
 
         private bool IsMissingOptions(out List<string> missing)

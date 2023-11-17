@@ -23,7 +23,7 @@ namespace EAVFW.Extensions.Docs.Generator
             _writer = new StreamWriter(path);
         }
 
-        public async Task WriteTables(FileInfo manifest)
+        public async Task WriteTables(FileInfo manifest, string component)
         {
             var manifestObject = await JsonSerializer.DeserializeAsync<ManifestDefinition>(manifest.OpenRead());
 
@@ -44,7 +44,7 @@ namespace EAVFW.Extensions.Docs.Generator
             }
         }
 
-        public async Task WritePlugins(IEnumerable<PluginDocumentation> pluginDocumentations)
+        public async Task WritePlugins(IEnumerable<PluginDocumentation> pluginDocumentations, string component)
         {
             var groups = pluginDocumentations.GroupBy(x => x.Entity!.Name);
             await _writer.WriteLineAsync("## Plugins ");
@@ -74,8 +74,11 @@ namespace EAVFW.Extensions.Docs.Generator
                 }
             }
         }
-        
-        // public async Task WriteWizards()
+
+        public async Task WriteWizards()
+        {
+            
+        }
             
 
         private string SanitizeSummary(string summary)

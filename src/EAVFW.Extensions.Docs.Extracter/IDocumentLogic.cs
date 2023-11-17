@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using EAVFW.Extensions.Manifest.SDK;
 
 namespace EAVFW.Extensions.Docs.Extracter
 {
@@ -21,6 +22,6 @@ namespace EAVFW.Extensions.Docs.Extracter
         /// <param name="manifestFile"></param>
         /// <param name="pluginInfo"></param>
         /// <returns></returns>
-        IEnumerable<string> ExtractWizardDocumentation(FileInfo manifestFile, PluginInfo pluginInfo);
+        Dictionary<string, EntityDefinition> ExtractWizardDocumentation(FileInfo manifestFile, PluginInfo pluginInfo);
     }
 }

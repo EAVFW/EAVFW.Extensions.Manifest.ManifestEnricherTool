@@ -14,7 +14,7 @@ namespace EAVFW.Extensions.Docs.Extracter
 
         public override void Write(Utf8JsonWriter writer, Type value, JsonSerializerOptions options)
         {
-            JsonValue.Create(value.Name)?.WriteTo(writer, options);
+            JsonValue.Create(value.Name).WriteTo(writer, options);
         }
     }
 }
