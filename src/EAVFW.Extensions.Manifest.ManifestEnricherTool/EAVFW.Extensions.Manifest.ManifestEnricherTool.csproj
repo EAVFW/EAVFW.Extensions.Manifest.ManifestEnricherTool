@@ -55,7 +55,7 @@
 		<PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.2.0" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\EAVFW.Extensions.Docs.Extracter\EAVFW.Extensions.Docs.Extracter.csproj" />
+	  <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj" />
 	  <ProjectReference Include="..\EAVFW.Extensions.Docs.Generator\EAVFW.Extensions.Docs.Generator.csproj" />
 	</ItemGroup>
 </Project>

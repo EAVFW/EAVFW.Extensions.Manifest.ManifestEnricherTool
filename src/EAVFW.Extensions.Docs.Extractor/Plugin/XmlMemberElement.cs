@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace EAVFW.Extensions.Docs.Extracter
+namespace EAVFW.Extensions.Docs.Extractor
 {
     [XmlRoot("member")]
     public class XmlMemberElement

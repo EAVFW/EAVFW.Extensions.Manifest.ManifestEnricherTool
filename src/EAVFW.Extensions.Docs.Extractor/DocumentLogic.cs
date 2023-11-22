@@ -4,14 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using System.Security.Principal;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using EAVFramework.Plugins;
 using EAVFW.Extensions.Manifest.SDK;
 using WorkflowEngine.Core;
 
-namespace EAVFW.Extensions.Docs.Extracter
+namespace EAVFW.Extensions.Docs.Extractor
 {
     public class DocumentLogic : IDocumentLogic
     {
@@ -53,11 +51,12 @@ namespace EAVFW.Extensions.Docs.Extracter
                     .FirstOrDefault(i => i.GenericTypeArguments.Length == 2)
                 select new PluginDocumentation
                 {
-                    PluginRegistrations = pluginRegistrations,
+                    PluginRegistrations = pluginRegistrations.Select(x => new PluginRegistrationAttributeData
+                        { Order = x.Order, Execution = x.Execution, Operation = x.Operation, Mode = x.Mode }),
                     Name = implementingType.Name,
                     Summary = implementingType.GetDocumentation(),
-                    Context = _interface.GetGenericArguments().First(),
-                    Entity = _interface.GetGenericArguments().Last()
+                    Context = new TypeInformation(_interface.GetGenericArguments().First()),
+                    Entity = new TypeInformation(_interface.GetGenericArguments().Last())
                 };
 
             return plugins;
@@ -106,7 +105,7 @@ namespace EAVFW.Extensions.Docs.Extracter
                     from _tabs in wizard.Value.Tabs
                     select _tabs).AsEnumerable();
 
-            // Glorified for loop?
+            // Glorified for loop?w
             var tabsWithWorkflows =
                 from tab in tabs
                 where tab.Value.OnTransitionOut?.Workflow != null || tab.Value.OnTransitionIn?.Workflow != null

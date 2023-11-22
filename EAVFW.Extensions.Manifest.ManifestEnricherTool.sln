@@ -44,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFramework", "external\EA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Manifest.SDK", "external\EAVFramework\sdk\EAVFW.Extensions.Manifest.SDK.csproj", "{3BEF0769-ABD1-4D34-8004-C98DE9FB0339}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EAVFW.Extensions.Docs.Extracter", "src\EAVFW.Extensions.Docs.Extracter\EAVFW.Extensions.Docs.Extracter.csproj", "{432042AB-6A78-4ED7-B8AC-73B047F6630F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EAVFW.Extensions.Docs.Extractor", "src\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj", "{432042AB-6A78-4ED7-B8AC-73B047F6630F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EAVFW.Extensions.Docs.Generator", "src\EAVFW.Extensions.Docs.Generator\EAVFW.Extensions.Docs.Generator.csproj", "{71FCB365-F4AE-4578-BF86-B4A3C278B6B1}"
 EndProject

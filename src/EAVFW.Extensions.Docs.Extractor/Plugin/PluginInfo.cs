@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace EAVFW.Extensions.Docs.Extracter
+namespace EAVFW.Extensions.Docs.Extractor
 {
     public struct PluginInfo
     {

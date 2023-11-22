@@ -1,4 +1,4 @@
-namespace EAVFW.Extensions.Docs.Extracter
+namespace EAVFW.Extensions.Docs.Extractor
 {
     public class AssemblyInfo
     {

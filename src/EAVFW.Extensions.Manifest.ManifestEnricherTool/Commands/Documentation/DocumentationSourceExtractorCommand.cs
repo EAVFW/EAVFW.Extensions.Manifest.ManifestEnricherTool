@@ -7,14 +7,19 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using EAVFW.Extensions.Docs.Extracter;
-using EAVFW.Extensions.Docs.Generator;
+using EAVFW.Extensions.Docs.Extractor;
 
-namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
+namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
 {
-    public class DocumentCommand : Command
+    /*
+     * There are many parameters to the command and generating source for both plugin and wizard requires the tool to be
+     * executed twice. Alternatively, the "configuration" could be done using a configuration, which would provide all
+     * necessary parameters. Both it would be more rigid and could not easily be changed in a pipeline or other. 
+     */
+    
+    public class DocumentationSourceExtractorCommand : Command
     {
-        private readonly IDocumentLogic documentLogic;
+        private readonly IDocumentLogic _documentLogic;
 
         [Alias("-a")]
         [Alias("--assembly")]
@@ -29,15 +34,15 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         [Alias("-p")]
         [Alias("--probing-path")]
         [Description("Path to probe for dependent assemblies")]
-        public DirectoryInfo RootPathOption { get; set; }
+        public DirectoryInfo ProbePathOption { get; set; }
 
         [Alias("-c")]
         [Alias("--configuration")]
         [Description("Configuration for the built assembly")]
         public string ConfigurationOption { get; set; }
-
+        
         [Alias("--component")]
-        [Description("Component to generate documentation. E.g., `mainfest.component.json`")]
+        [Description("Component to generate documentation. E.g., `manifest.component.json`")]
         public string ComponentOption { get; set; }
 
         [Alias("-f")]
@@ -61,9 +66,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             Wizards
         }
 
-        public DocumentCommand(IDocumentLogic documentLogic) : base("docs", "Generate documentation")
+        public DocumentationSourceExtractorCommand(IDocumentLogic documentLogic) : base("extract", "Extract documentation source")
         {
-            this.documentLogic = documentLogic ?? throw new ArgumentNullException(nameof(documentLogic));
+            _documentLogic = documentLogic ?? throw new ArgumentNullException(nameof(documentLogic));
             Handler = COmmandExtensions.Create(this, Array.Empty<Command>(), Run);
         }
 
@@ -75,7 +80,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 return 126;
             }
 
-            if (!RootPathOption.Exists)
+            if (!ProbePathOption.Exists)
             {
                 Console.WriteLine("Probing path does not exists");
                 return 1;
@@ -90,15 +95,15 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             switch (Target)
             {
                 case Targets.Plugins:
-                    return await HandlePlugins();
+                    return await GeneratePluginSource();
                 case Targets.Wizards:
-                    return await HandleWizards();
+                    return await GenerateWizardSource();
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private async Task<int> HandleWizards()
+        private async Task<int> GenerateWizardSource()
         {
             if (!ManifestPathOption?.Exists ?? true)
             {
@@ -106,9 +111,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
                 return 1;
             }
 
-            var entityDefinitions = documentLogic.ExtractWizardDocumentation(
+            var entityDefinitions = _documentLogic.ExtractWizardDocumentation(
                 ManifestPathOption,
-                new PluginInfo(RootPathOption,
+                new PluginInfo(ProbePathOption,
                     AssemblyPathOption,
                     ConfigurationOption,
                     FrameworkOption));
@@ -133,16 +138,15 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             return 0;
         }
 
-        private async Task<int> HandlePlugins()
+        private async Task<int> GeneratePluginSource()
         {
-            var plugins = documentLogic
-                .ExtractPluginDocumentation(new PluginInfo(RootPathOption, AssemblyPathOption, ConfigurationOption,
+            var plugins = _documentLogic
+                .ExtractPluginDocumentation(new PluginInfo(ProbePathOption, AssemblyPathOption, ConfigurationOption,
                     FrameworkOption))
                 .ToArray();
-
+            
             var jsonString = JsonSerializer.Serialize(plugins, new JsonSerializerOptions
             {
-                Converters = { new PluginRegistrationAttributeConverter() },
                 WriteIndented = true
             });
 
@@ -169,8 +173,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             if (AssemblyPathOption == null)
                 missing.Add(nameof(AssemblyPathOption));
 
-            if (RootPathOption == null)
-                missing.Add(nameof(RootPathOption));
+            if (ProbePathOption == null)
+                missing.Add(nameof(ProbePathOption));
 
             if (string.IsNullOrWhiteSpace(ConfigurationOption))
                 missing.Add(nameof(ConfigurationOption));

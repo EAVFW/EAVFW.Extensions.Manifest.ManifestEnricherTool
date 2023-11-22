@@ -1,6 +1,4 @@
 ﻿
-
-
 // See https://aka.ms/new-console-template for more information
 using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands;
 using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.GPT;
@@ -9,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Threading.Tasks;
-using EAVFW.Extensions.Docs.Extracter;
+using EAVFW.Extensions.Docs.Extractor;
+using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation;
 using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Gzip;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
@@ -36,7 +35,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             serviceCollection.AddSingleton<Command, ManifestCommand>();
             serviceCollection.AddSingleton<Command, CertCommand>();
             serviceCollection.AddSingleton<Command, GzipCommand>();
-            serviceCollection.AddSingleton<Command, DocumentCommand>();
+            serviceCollection.AddSingleton<Command, DocumentationSourceCommand>();
             serviceCollection.AddGPT();
 
             serviceCollection.AddTransient<IManifestMerger, ManifestMerger>();

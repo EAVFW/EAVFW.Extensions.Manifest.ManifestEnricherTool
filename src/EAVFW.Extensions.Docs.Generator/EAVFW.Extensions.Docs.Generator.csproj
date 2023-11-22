@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EAVFW.Extensions.Docs.Extracter\EAVFW.Extensions.Docs.Extracter.csproj" />
+      <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using EAVFW.Extensions.Manifest.SDK;
 
-namespace EAVFW.Extensions.Docs.Extracter
+namespace EAVFW.Extensions.Docs.Extractor
 {
     public interface IDocumentLogic
     {

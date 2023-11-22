@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 
-namespace EAVFW.Extensions.Docs.Extracter
+namespace EAVFW.Extensions.Docs.Extractor
 {
     public static class XmlDocumentationHelper
     {
