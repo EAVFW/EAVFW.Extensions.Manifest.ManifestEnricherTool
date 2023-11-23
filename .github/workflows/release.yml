@@ -44,8 +44,8 @@ jobs:
       - name: Cleaning
         run: dotnet clean --configuration Release
 
-      - name: Restore NuGet packages
-        run: dotnet restore EAVFW.Extensions.Manifest.ManifestEnricherTool.sln
+#      - name: Restore NuGet packages
+#        run: dotnet restore EAVFW.Extensions.Manifest.ManifestEnricherTool.sln
 
       - name: Package Parser
         run: dotnet pack -c Release -p:PackageVersion=${env:RELEASE_VERSION} -o ./artifacts

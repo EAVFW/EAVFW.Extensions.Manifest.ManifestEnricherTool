@@ -25,6 +25,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
     public class SQLCommand : Command
     {
+       
+
         public Argument<string> ProjectPath = new Argument<string>("ProjectPath", "The project path to EAV Model Project");
         public Option<string> OutputFile = new Option<string>("OutputFile", "The output sql script for database migrations");
 
@@ -53,6 +55,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             this.manifestPermissionGenerator = manifestPermissionGenerator ?? throw new ArgumentNullException(nameof(manifestPermissionGenerator));
 
             Add(new SQLApplyCommand());
+            Add(new SQLUserCommand());
             
         }
         private async Task Run(ParseResult parseResult, IConsole console)
@@ -74,7 +77,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.ReplaceService<IMigrationsAssembly, DbSchemaAwareMigrationAssembly>();
-            var test = typeof(Point);
+           
             var ctx = new DynamicContext(optionsBuilder.Options, Microsoft.Extensions.Options.Options.Create(
                  new EAVFramework.DynamicContextOptions
                  {
@@ -98,7 +101,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             Directory.CreateDirectory(outputDirectory);
             await File.WriteAllTextAsync(outputFile, sql);
             console.WriteLine("Written: " + Path.GetFullPath(  outputFile));
-
+            
             if(parseResult.GetValueForOption(ShouldGeneratePermissions))
                 await InitializeSystemAdministrator(parseResult, outputDirectory,model);
          }

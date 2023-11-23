@@ -1,69 +1,51 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
-		 
-		 
-		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>eavfw-manifest</ToolCommandName>
-
-		<PackageOutputPath>./../../artifacts</PackageOutputPath>
-
-		<Title>ManifestEnricherTool</Title>
-		<Authors>Poul Kjeldager</Authors>
-		<Description>A tool to enrich and transform manifest.json to manifest.g.json</Description>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/EAVFW/EAVFW.Extensions.Manifest.ManifestEnricherTool</RepositoryUrl>
-
-		<RemoteEAVFramework>true</RemoteEAVFramework>
-		 
-		<LocalEAVFrameworkPath>..\..\..\..\EAVFramework</LocalEAVFrameworkPath>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	 
-		<PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.21" />	 
-		<PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.1.3" />	 
-		<PackageReference Include="LibGit2Sharp" Version="0.26.2" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Semver" Version="2.2.0" />
-		 
-	</ItemGroup>
-	
-	<ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite">
-			<Version>3.1.31</Version>
-		</PackageReference>
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite">
-			<Version>6.0.11</Version>
-		</PackageReference>
-	</ItemGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>eavfw-manifest</ToolCommandName>
+    <PackageOutputPath>./../../artifacts</PackageOutputPath>
+    <Title>ManifestEnricherTool</Title>
+    <Authors>Poul Kjeldager</Authors>
+    <Description>A tool to enrich and transform manifest.json to manifest.g.json</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/EAVFW/EAVFW.Extensions.Manifest.ManifestEnricherTool</RepositoryUrl>
+    
+    
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.26" />
+    
+    <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
+    
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Semver" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite">
+      <Version>3.1.31</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite">
+      <Version>6.0.11</Version>
+    </PackageReference>
+  </ItemGroup>
 
 
-
-	<ItemGroup Condition="$(RemoteEAVFramework) == 'false'">
-
+	<ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
 		<ProjectReference Include="$(LocalEAVFrameworkPath)\src\EAVFramework.csproj" />
+		<ProjectReference Include="$(LocalExternalpath)/EAVFW.Extensions.CommandLine/src/EAVFW.Extensions.CommandLine/EAVFW.Extensions.CommandLine.csproj" />
 
 	</ItemGroup>
-
-	<ItemGroup Condition="$(RemoteEAVFramework) != 'false'">
-		<PackageReference Include="EAVFramework" Version="2.3.0" />
-
+	<ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
+		<PackageReference Include="EAVFramework" Version="4.0.2" />
+		<PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.2.0" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\EAVFW.Extensions.Manifest.SDK\EAVFW.Extensions.Manifest.SDK.csproj" />
-	</ItemGroup>
-
-
 </Project>
