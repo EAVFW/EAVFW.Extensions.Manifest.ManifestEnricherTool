@@ -6,13 +6,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj" />
+        <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Reference Include="EAVFW.Extensions.Manifest.SDK">
-        <HintPath>..\EAVFW.Extensions.Manifest.ManifestEnricherTool\bin\Debug\net8.0\EAVFW.Extensions.Manifest.SDK.dll</HintPath>
-      </Reference>
+    <ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
+        <ProjectReference Include="$(LocalExternalpath)/EAVFramework/src/EAVFramework.csproj"/>
+        <ProjectReference Include="$(LocalExternalpath)/EAVFramework/sdkEAVFW.Extensions.Manifest.SDK.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
+        <PackageReference Include="EAVFW.Extensions.Manifest.SDK" Version="4.2.0"/>
+        <PackageReference Include="EAVFramework" Version="4.2.0"/>
     </ItemGroup>
 
 </Project>

@@ -15,13 +15,14 @@
       <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Reference Include="EAVFW.Extensions.Manifest.SDK">
-        <HintPath>..\EAVFW.Extensions.Manifest.ManifestEnricherTool\bin\Debug\net8.0\EAVFW.Extensions.Manifest.SDK.dll</HintPath>
-      </Reference>
-      <Reference Include="WorkflowEngine.Core">
-        <HintPath>..\..\..\..\hafnia\LetterofIndemnity\Hafnia.Tests\bin\Release\net6.0\WorkflowEngine.Core.dll</HintPath>
-      </Reference>
+    <ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
+        <PackageReference Include="EAVFW.Extensions.Manifest.SDK" Version="4.2.0"/>
+        <PackageReference Include="EAVFW.Extensions.WorkflowEngine" Version="3.1.4" />
     </ItemGroup>
+
+    <ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
+        <ProjectReference Include="$(LocalExternalpath)/EAVFramework/src/EAVFramework.csproj" />
+    </ItemGroup>
+
 
 </Project>
