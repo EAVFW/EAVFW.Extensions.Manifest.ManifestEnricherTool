@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>eavfw-manifest</ToolCommandName>
     <PackageOutputPath>./../../artifacts</PackageOutputPath>
@@ -20,8 +20,9 @@
     <PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.26" />
     
     <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
-    
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Semver" Version="2.2.0" />
   </ItemGroup>
@@ -37,15 +38,25 @@
       <Version>6.0.11</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite">
+      <Version>7.0.13</Version>
+    </PackageReference>
+  </ItemGroup>
 
 
 	<ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
 		<ProjectReference Include="$(LocalEAVFrameworkPath)\src\EAVFramework.csproj" />
 		<ProjectReference Include="$(LocalExternalpath)/EAVFW.Extensions.CommandLine/src/EAVFW.Extensions.CommandLine/EAVFW.Extensions.CommandLine.csproj" />
-
 	</ItemGroup>
+    
 	<ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
-		<PackageReference Include="EAVFramework" Version="4.0.2" />
+		<PackageReference Include="EAVFramework" Version="4.2.0" />
 		<PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.2.0" />
+	</ItemGroup>
+    
+	<ItemGroup>
+	  <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj" />
+	  <ProjectReference Include="..\EAVFW.Extensions.Docs.Generator\EAVFW.Extensions.Docs.Generator.csproj" />
 	</ItemGroup>
 </Project>

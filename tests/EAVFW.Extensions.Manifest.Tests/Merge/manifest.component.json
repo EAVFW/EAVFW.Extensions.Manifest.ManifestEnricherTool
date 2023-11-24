@@ -1,0 +1,19 @@
+{
+  "entities": {
+    "System User": {
+      "attributes": {
+        "Organization": {
+          "type": "Text"
+        }
+      }
+    },
+    "Component Table": {
+      "pluralName": "Component Tables",
+      "attributes": {
+        "Name": {
+          "type": "Text"
+        }
+      }
+    }
+  }
+}

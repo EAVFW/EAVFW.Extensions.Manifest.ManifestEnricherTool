@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
+        <ProjectReference Include="$(LocalExternalpath)/EAVFramework/src/EAVFramework.csproj"/>
+        <ProjectReference Include="$(LocalExternalpath)/EAVFramework/sdkEAVFW.Extensions.Manifest.SDK.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
+        <PackageReference Include="EAVFW.Extensions.Manifest.SDK" Version="4.2.0"/>
+        <PackageReference Include="EAVFramework" Version="4.2.0"/>
+    </ItemGroup>
+
+</Project>
