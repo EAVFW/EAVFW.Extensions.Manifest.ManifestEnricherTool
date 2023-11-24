@@ -26,8 +26,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
         [Description("Path for the assembly")]
         public FileInfo AssemblyPathOption { get; set; }
 
-        [Alias("-m")]
-        [Alias("--manifest")]
+        [Alias("-gm")]
+        [Alias("--generated-manifest")]
         [Description("Path for the enriched manifest")]
         public FileInfo ManifestPathOption { get; set; }
 
@@ -40,10 +40,6 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
         [Alias("--configuration")]
         [Description("Configuration for the built assembly")]
         public string ConfigurationOption { get; set; }
-        
-        [Alias("--component")]
-        [Description("Component to generate documentation. E.g., `manifest.component.json`")]
-        public string ComponentOption { get; set; }
 
         [Alias("-f")]
         [Alias("--framework")]

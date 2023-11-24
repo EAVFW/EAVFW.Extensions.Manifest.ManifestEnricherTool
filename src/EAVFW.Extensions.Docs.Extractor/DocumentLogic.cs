@@ -105,7 +105,7 @@ namespace EAVFW.Extensions.Docs.Extractor
                     from _tabs in wizard.Value.Tabs
                     select _tabs).AsEnumerable();
 
-            // Glorified for loop?w
+            // Glorified for loop?
             var tabsWithWorkflows =
                 from tab in tabs
                 where tab.Value.OnTransitionOut?.Workflow != null || tab.Value.OnTransitionIn?.Workflow != null
