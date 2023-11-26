@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <LangVersion>9.0</LangVersion>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <RootNamespace>EAVFW.Extensions.Docs.Extracter</RootNamespace>
     </PropertyGroup>
