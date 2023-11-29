@@ -7,35 +7,13 @@ using System.Runtime.Loader;
 using System.Text.Json;
 using EAVFramework.Plugins;
 using EAVFW.Extensions.Manifest.SDK;
+using Microsoft.Extensions.FileSystemGlobbing;
 using WorkflowEngine.Core;
 
 namespace EAVFW.Extensions.Docs.Extractor
 {
     public class DocumentLogic : IDocumentLogic
     {
-        private static Dictionary<string, AssemblyInfo> BuildAssemblyDictionary(IEnumerable<string> binDirectories)
-        {
-            var dictionary = new Dictionary<string, AssemblyInfo>();
-
-            foreach (var directory in binDirectories)
-            {
-                var dlls = Directory.GetFiles(directory, "*.dll");
-                foreach (var dll in dlls)
-                {
-                    var assemblyName = AssemblyName.GetAssemblyName(dll);
-
-                    dictionary.TryAdd(assemblyName.Name!, new AssemblyInfo
-                    {
-                        Name = assemblyName.Name!,
-                        Version = assemblyName.Version!.ToString(),
-                        Path = dll
-                    });
-                }
-            }
-
-            return dictionary;
-        }
-
         /// <inheritdoc />
         public IEnumerable<PluginDocumentation> ExtractPluginDocumentation(PluginInfo pluginInfo)
         {
@@ -64,14 +42,23 @@ namespace EAVFW.Extensions.Docs.Extractor
 
         private static Assembly LoadAssembly(PluginInfo pluginInfo)
         {
-            var subDirectories = pluginInfo.RootPath.EnumerateDirectories("*", SearchOption.AllDirectories);
+            var matcher = new Matcher();
+            matcher.AddInclude(pluginInfo.Search);
 
-            var directoriesWithBin =
-                from d in subDirectories
-                where d.FullName.EndsWith($"bin/{pluginInfo.Configuration}/{pluginInfo.Framework}")
-                select d.FullName;
+            var dictionary = new Dictionary<string, AssemblyInfo>();
+            foreach (var file in matcher.GetResultsInFullPath(pluginInfo.RootPath.FullName))
+            {
+                var assemblyName = AssemblyName.GetAssemblyName(file);
 
-            CustomAssemblyResolver.Dictionary = BuildAssemblyDictionary(directoriesWithBin.AsQueryable());
+                dictionary.TryAdd(assemblyName.Name!, new AssemblyInfo
+                {
+                    Name = assemblyName.Name!,
+                    Version = assemblyName.Version!.ToString(),
+                    Path = file
+                });
+            }
+
+            CustomAssemblyResolver.Dictionary = dictionary;
 
             var currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += CustomAssemblyResolver.CustomAssemblyResolverEventHandler;

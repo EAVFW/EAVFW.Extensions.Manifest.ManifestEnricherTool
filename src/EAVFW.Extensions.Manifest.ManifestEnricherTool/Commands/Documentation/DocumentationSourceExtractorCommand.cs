@@ -32,19 +32,9 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
         public FileInfo ManifestPathOption { get; set; }
 
         [Alias("-p")]
-        [Alias("--probing-path")]
-        [Description("Path to probe for dependent assemblies")]
+        [Alias("--probing-pattern")]
+        [Description("Path pattern used to probe for assemblies, supporting glob patterns")]
         public DirectoryInfo ProbePathOption { get; set; }
-
-        [Alias("-c")]
-        [Alias("--configuration")]
-        [Description("Configuration for the built assembly")]
-        public string ConfigurationOption { get; set; }
-
-        [Alias("-f")]
-        [Alias("--framework")]
-        [Description("Framework confugraiton for the built assembly")]
-        public string FrameworkOption { get; set; }
 
         [Alias("-o")]
         [Alias("--output")]
@@ -53,7 +43,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
 
         [Alias("-t")]
         [Alias("--target")]
-        [Description("Target?")]
+        [Description("What kind of documentation source should be extracted")]
         public Targets Target { get; set; }
 
         public enum Targets
@@ -74,12 +64,6 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
             {
                 Console.WriteLine("The following options are missed: " + string.Join(", ", missing));
                 return 126;
-            }
-
-            if (!ProbePathOption.Exists)
-            {
-                Console.WriteLine("Probing path does not exists");
-                return 1;
             }
 
             if (!AssemblyPathOption.Exists)
@@ -110,9 +94,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
             var entityDefinitions = _documentLogic.ExtractWizardDocumentation(
                 ManifestPathOption,
                 new PluginInfo(ProbePathOption,
-                    AssemblyPathOption,
-                    ConfigurationOption,
-                    FrameworkOption));
+                    AssemblyPathOption));
 
             var basePath = new DirectoryInfo(CalculateFullPath("wizards"));
 
@@ -137,8 +119,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
         private async Task<int> GeneratePluginSource()
         {
             var plugins = _documentLogic
-                .ExtractPluginDocumentation(new PluginInfo(ProbePathOption, AssemblyPathOption, ConfigurationOption,
-                    FrameworkOption))
+                .ExtractPluginDocumentation(new PluginInfo(ProbePathOption, AssemblyPathOption))
                 .ToArray();
             
             var jsonString = JsonSerializer.Serialize(plugins, new JsonSerializerOptions
@@ -171,12 +152,6 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Documentation
 
             if (ProbePathOption == null)
                 missing.Add(nameof(ProbePathOption));
-
-            if (string.IsNullOrWhiteSpace(ConfigurationOption))
-                missing.Add(nameof(ConfigurationOption));
-
-            if (string.IsNullOrWhiteSpace(FrameworkOption))
-                missing.Add(nameof(FrameworkOption));
 
             return false;
         }
