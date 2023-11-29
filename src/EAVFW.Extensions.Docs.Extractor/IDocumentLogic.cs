@@ -13,7 +13,7 @@ namespace EAVFW.Extensions.Docs.Extractor
         /// Remember to enable GenerateDocumentationFile for the project.
         /// <param name="pluginInfo"></param>
         /// </summary>
-        IEnumerable<PluginDocumentation> ExtractPluginDocumentation(PluginInfo pluginInfo);
+        IEnumerable<PluginDocumentation> ExtractPluginDocumentation(FileInfo assemblyInfo, string[] assemblies);
 
         /// <summary>
         /// Extract Wizards from the given Manifest and generate documentation based on manifest metadata and workflow
@@ -22,6 +22,6 @@ namespace EAVFW.Extensions.Docs.Extractor
         /// <param name="manifestFile"></param>
         /// <param name="pluginInfo"></param>
         /// <returns></returns>
-        Dictionary<string, EntityDefinition> ExtractWizardDocumentation(FileInfo manifestFile, PluginInfo pluginInfo);
+        Dictionary<string, EntityDefinition> ExtractWizardDocumentation(FileInfo manifestFile, FileInfo assemblyInfo, string[] assemblies);
     }
 }

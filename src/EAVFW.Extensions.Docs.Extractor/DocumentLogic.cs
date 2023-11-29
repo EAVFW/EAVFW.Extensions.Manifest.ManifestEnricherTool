@@ -7,7 +7,6 @@ using System.Runtime.Loader;
 using System.Text.Json;
 using EAVFramework.Plugins;
 using EAVFW.Extensions.Manifest.SDK;
-using Microsoft.Extensions.FileSystemGlobbing;
 using WorkflowEngine.Core;
 
 namespace EAVFW.Extensions.Docs.Extractor
@@ -15,9 +14,9 @@ namespace EAVFW.Extensions.Docs.Extractor
     public class DocumentLogic : IDocumentLogic
     {
         /// <inheritdoc />
-        public IEnumerable<PluginDocumentation> ExtractPluginDocumentation(PluginInfo pluginInfo)
+        public IEnumerable<PluginDocumentation> ExtractPluginDocumentation(FileInfo assemblyInfo, string[] assemblies)
         {
-            var assembly = LoadAssembly(pluginInfo);
+            var assembly = LoadAssembly(assemblyInfo, assemblies);
 
             var implementingTypes = assembly.GetTypes()
                 .Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
@@ -40,13 +39,10 @@ namespace EAVFW.Extensions.Docs.Extractor
             return plugins;
         }
 
-        private static Assembly LoadAssembly(PluginInfo pluginInfo)
+        private static Assembly LoadAssembly(FileInfo assemblyInfo, string [] assemblies)
         {
-            var matcher = new Matcher();
-            matcher.AddInclude(pluginInfo.Search);
-
             var dictionary = new Dictionary<string, AssemblyInfo>();
-            foreach (var file in matcher.GetResultsInFullPath(pluginInfo.RootPath.FullName))
+            foreach (var file in assemblies)
             {
                 var assemblyName = AssemblyName.GetAssemblyName(file);
 
@@ -63,15 +59,15 @@ namespace EAVFW.Extensions.Docs.Extractor
             var currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += CustomAssemblyResolver.CustomAssemblyResolverEventHandler;
 
-            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(pluginInfo.AssemblyPath.FullName);
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyInfo.FullName);
             return assembly;
         }
 
         /// <inheritdoc/>
         public Dictionary<string, EntityDefinition> ExtractWizardDocumentation(FileInfo manifestFile,
-            PluginInfo pluginInfo)
+            FileInfo assemblyInfo, string[] assemblies)
         {
-            var assembly = LoadAssembly(pluginInfo);
+            var assembly = LoadAssembly(assemblyInfo, assemblies);
 
             // Preloading types to easily query for documentation
             var workflows = assembly.GetTypes()
