@@ -282,9 +282,14 @@ namespace EAVFW.Extensions.Docs.Generator
 
             var t = new DefaultSchemaNameManager();
 
-            var entities = manifest.Entities.Where(entity =>
-                entity.Value.AdditionalFields.ContainsKey("moduleSource") &&
-                entity.Value.AdditionalFields["moduleSource"].ToString() == component);
+            var entities = manifest.Entities;
+            if (!string.IsNullOrWhiteSpace(component))
+            {
+                entities = manifest.Entities.Where(entity =>
+                        entity.Value.AdditionalFields.ContainsKey("moduleSource") &&
+                        entity.Value.AdditionalFields["moduleSource"].ToString() == component)
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
 
             var ignored = new List<string>
                 { "Modified On", "Modified By", "Created By", "Created On", "Row Version", "Owner" };
