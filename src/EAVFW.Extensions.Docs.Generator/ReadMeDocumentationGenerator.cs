@@ -102,13 +102,13 @@ namespace EAVFW.Extensions.Docs.Generator
             await writer.WriteLineAsync("## Table of contents");
 
             var index = 2;
-            await writer.WriteLineAsync("1. [Class diagram](#class-diagram)");
+            await writer.WriteLineAsync("1. [Class diagram](#Class-diagram)");
             foreach (var (key, value) in entitiesToWrite)
             {
-                await writer.WriteLineAsync($"{index++}. [{key}](#{_schemaNameManager.ToSchemaName(key)})");
+                await writer.WriteLineAsync($"{index++}. [{key}](#{key.Replace(' ', '-')})");
             }
 
-            await writer.WriteLineAsync("# Class diagram <a name=\"class-diagram\"></a>");
+            await writer.WriteLineAsync("# Class diagram");
             await writer.WriteAsync(EntitiesToClassDiagram(_manifestObject, component));
 
             var ignored = new List<string>
@@ -116,7 +116,7 @@ namespace EAVFW.Extensions.Docs.Generator
 
             foreach (var (key, value) in entitiesToWrite)
             {
-                await writer.WriteLineAsync($"## {key} <a name=\"{_schemaNameManager.ToSchemaName(key)}\"></a>");
+                await writer.WriteLineAsync($"## {key}");
 
                 await writer.WriteLineAsync(value.Description);
 
