@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Newtonsoft.Json.Linq;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
@@ -15,7 +16,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
             _moduleMetadataEnricher =
                 moduleMetadataEnricher ?? throw new ArgumentNullException(nameof(moduleMetadataEnricher));
         }
-        
+
         /// <inheritdoc/>
         public async Task<JToken> MergeManifests(FileInfo path)
         {
@@ -41,12 +42,44 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                 {
                     // union array values together to avoid duplicates
                     MergeArrayHandling = MergeArrayHandling.Union,
-                    PropertyNameComparison = System.StringComparison.OrdinalIgnoreCase,
+                    PropertyNameComparison = StringComparison.OrdinalIgnoreCase,
                     MergeNullValueHandling = MergeNullValueHandling.Ignore
                 });
             }
 
+            var matcher = new Matcher();
+            matcher.AddInclude("**/entities/*");
+            matcher.AddInclude("**/attributes/*");
+            matcher.AddInclude("**/wizards/*");
+
+            CleanModuleLocationSource(jtokenRaw, matcher, "root");
+
             return jsonRaw;
+        }
+
+        private static void CleanModuleLocationSource(JToken jToken, Matcher matcher, string path)
+        {
+            switch (jToken)
+            {
+                case JObject jObject:
+                {
+                    if (!matcher.Match(path).HasMatches)
+                    {
+                        jObject.Remove("moduleSource");
+                        jObject.Remove("moduleLocation");
+                    }
+                    
+                    foreach (var (key, value) in jObject)
+                        CleanModuleLocationSource(value, matcher, $"{path}/{key}");
+                    break;
+                }
+                case JArray jArray:
+                {
+                    foreach (var child in jArray.Children())
+                        CleanModuleLocationSource(child, matcher, path);
+                    break;
+                }
+            }
         }
     }
 }
