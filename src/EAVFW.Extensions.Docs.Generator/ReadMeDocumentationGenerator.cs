@@ -278,7 +278,6 @@ namespace EAVFW.Extensions.Docs.Generator
 
             diagramBuilder.AppendLine("::: mermaid");
             diagramBuilder.AppendLine("classDiagram");
-            diagramBuilder.AppendLine($"\tnote \"Class diagram for {component}\"");
 
             var t = new DefaultSchemaNameManager();
 
