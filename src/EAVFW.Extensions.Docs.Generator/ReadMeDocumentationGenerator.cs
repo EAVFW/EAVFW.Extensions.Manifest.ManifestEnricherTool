@@ -276,7 +276,7 @@ namespace EAVFW.Extensions.Docs.Generator
         {
             var diagramBuilder = new StringBuilder();
 
-            diagramBuilder.AppendLine("```mermaid");
+            diagramBuilder.AppendLine("::: mermaid");
             diagramBuilder.AppendLine("classDiagram");
             diagramBuilder.AppendLine($"\tnote \"Class diagram for {component}\"");
 
@@ -293,7 +293,7 @@ namespace EAVFW.Extensions.Docs.Generator
             {
                 var attributes = value.Attributes.Where(x => !ignored.Contains(x.Key)).ToList();
 
-                diagramBuilder.AppendLine($"\tclass {t.ToSchemaName(key)}[\"{key}\"]{{");
+                diagramBuilder.AppendLine($"\tclass {t.ToSchemaName(key)}{{");
                 foreach (var (s, attributeDefinitionBase) in attributes)
                 {
                     if (attributeDefinitionBase is AttributeObjectDefinition o)
@@ -327,7 +327,7 @@ namespace EAVFW.Extensions.Docs.Generator
                 }
             }
 
-            diagramBuilder.AppendLine("```");
+            diagramBuilder.AppendLine(":::");
             return diagramBuilder.ToString();
         }
     }
