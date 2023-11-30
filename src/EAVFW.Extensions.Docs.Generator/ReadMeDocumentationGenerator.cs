@@ -102,13 +102,13 @@ namespace EAVFW.Extensions.Docs.Generator
             await writer.WriteLineAsync("## Table of contents");
 
             var index = 2;
-            await writer.WriteLineAsync("1. [Class diagram](#class-diagram)");
+            await writer.WriteLineAsync("1. [Class diagram](#Class-diagram)");
             foreach (var (key, value) in entitiesToWrite)
             {
-                await writer.WriteLineAsync($"{index++}. [{key}](#{_schemaNameManager.ToSchemaName(key)})");
+                await writer.WriteLineAsync($"{index++}. [{key}](#{key.Replace(' ', '-')})");
             }
 
-            await writer.WriteLineAsync("# Class diagram <a name=\"class-diagram\"></a>");
+            await writer.WriteLineAsync("# Class diagram");
             await writer.WriteAsync(EntitiesToClassDiagram(_manifestObject, component));
 
             var ignored = new List<string>
@@ -116,7 +116,7 @@ namespace EAVFW.Extensions.Docs.Generator
 
             foreach (var (key, value) in entitiesToWrite)
             {
-                await writer.WriteLineAsync($"## {key} <a name=\"{_schemaNameManager.ToSchemaName(key)}\"></a>");
+                await writer.WriteLineAsync($"## {key}");
 
                 await writer.WriteLineAsync(value.Description);
 
@@ -276,15 +276,20 @@ namespace EAVFW.Extensions.Docs.Generator
         {
             var diagramBuilder = new StringBuilder();
 
-            diagramBuilder.AppendLine("```mermaid");
+            diagramBuilder.AppendLine("::: mermaid");
             diagramBuilder.AppendLine("classDiagram");
             diagramBuilder.AppendLine($"\tnote \"Class diagram for {component}\"");
 
             var t = new DefaultSchemaNameManager();
 
-            var entities = manifest.Entities.Where(entity =>
-                entity.Value.AdditionalFields.ContainsKey("moduleSource") &&
-                entity.Value.AdditionalFields["moduleSource"].ToString() == component);
+            var entities = manifest.Entities;
+            if (!string.IsNullOrWhiteSpace(component))
+            {
+                entities = manifest.Entities.Where(entity =>
+                        entity.Value.AdditionalFields.ContainsKey("moduleSource") &&
+                        entity.Value.AdditionalFields["moduleSource"].ToString() == component)
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
 
             var ignored = new List<string>
                 { "Modified On", "Modified By", "Created By", "Created On", "Row Version", "Owner" };
@@ -293,7 +298,7 @@ namespace EAVFW.Extensions.Docs.Generator
             {
                 var attributes = value.Attributes.Where(x => !ignored.Contains(x.Key)).ToList();
 
-                diagramBuilder.AppendLine($"\tclass {t.ToSchemaName(key)}[\"{key}\"]{{");
+                diagramBuilder.AppendLine($"\tclass {t.ToSchemaName(key)}{{");
                 foreach (var (s, attributeDefinitionBase) in attributes)
                 {
                     if (attributeDefinitionBase is AttributeObjectDefinition o)
@@ -327,7 +332,7 @@ namespace EAVFW.Extensions.Docs.Generator
                 }
             }
 
-            diagramBuilder.AppendLine("```");
+            diagramBuilder.AppendLine(":::");
             return diagramBuilder.ToString();
         }
     }
