@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>9.0</LangVersion>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+        <Nullable>disable</Nullable>
+        <RootNamespace>EAVFW.Extensions.Docs.Extracter</RootNamespace>
+    </PropertyGroup>
+
+  
+
+    <ItemGroup>
+      <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
+        <PackageReference Include="EAVFW.Extensions.Manifest.SDK" Version="4.2.0"/>
+        <PackageReference Include="EAVFW.Extensions.WorkflowEngine" Version="3.1.4" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
+        <ProjectReference Include="$(LocalExternalpath)/EAVFramework/src/EAVFramework.csproj" />
+    </ItemGroup>
+
+
+</Project>

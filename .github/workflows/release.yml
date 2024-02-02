@@ -18,9 +18,9 @@ jobs:
         with:
           global-json-file: ./global.json
           
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '*'
 
       - name: Add plugin for conventional commits
         run: npm install conventional-changelog-conventionalcommits
