@@ -26,5 +26,22 @@ namespace EAVFW.Extensions.Manifest.Tests
 
 
         }
+
+        [TestMethod]
+        public async Task TestMethod2()
+        {
+            var servicecollection = new ServiceCollection();
+
+            servicecollection.AddManifestSDK<DataClientParameterGenerator>();
+
+            var _manifestEnricher = servicecollection.BuildServiceProvider().GetService<IManifestEnricher>();
+
+            await _manifestEnricher.LoadJsonDocumentAsync(JToken.Parse(File.ReadAllText("manifesttest002.json")), "maas", NullLogger.Instance);
+
+
+
+        }
+
+      
     }
 }

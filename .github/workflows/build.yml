@@ -19,7 +19,7 @@ jobs:
           global-json-file: ./global.json
 
       - name: Cleaning
-        run: dotnet clean
+        run: dotnet clean -c Release
 
       #- name: Restore NuGet packages
       #  run: dotnet restore EAVFW.Extensions.Manifest.ManifestEnricherTool.sln
