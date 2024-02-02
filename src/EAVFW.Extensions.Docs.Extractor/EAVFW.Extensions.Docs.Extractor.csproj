@@ -1,15 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <LangVersion>9.0</LangVersion>
         <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <RootNamespace>EAVFW.Extensions.Docs.Extracter</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\external\EAVFramework\src\EAVFramework.csproj" />
-    </ItemGroup>
+  
 
     <ItemGroup>
       <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
