@@ -1,0 +1,10 @@
+﻿<Project>
+ <PropertyGroup>
+   <LangVersion>9.0</LangVersion>
+   <EAVFrameworkVersion>4.2.1</EAVFrameworkVersion>
+   <UseEAVFromNuget>false</UseEAVFromNuget>
+   <LocalEAVFrameworkPath>$(MSBuildThisFileDirectory)/external/EAVFramework</LocalEAVFrameworkPath>
+   <LocalExternalpath>$(MSBuildThisFileDirectory)/external</LocalExternalpath>
+   <ManifestSDKPath>$(MSBuildThisFileDirectory)</ManifestSDKPath>
+ </PropertyGroup>
+</Project>

@@ -60,9 +60,9 @@
 		<PackageReference Include="EAVFramework" Version="2.3.0" />
 
 	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\EAVFW.Extensions.Manifest.SDK\EAVFW.Extensions.Manifest.SDK.csproj" />
+	<ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
+		<PackageReference Include="EAVFramework" Version="$(EAVFrameworkVersion)" />
+		<PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.2.0" />
 	</ItemGroup>
 
 

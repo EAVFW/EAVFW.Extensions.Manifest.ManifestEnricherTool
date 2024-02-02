@@ -12,16 +12,19 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
     public class CertCommand : Command
     {
+        public Option<string> Subject = new Option<string>("Subject", "");
+
         public CertCommand() : base("certs", "generalte certs files")
         {
-
+            Subject.AddAlias("--subject");
+            Add(Subject);
 
             Handler = CommandHandler.Create<ParseResult, IConsole>(Run);
         }
 
         private async Task Run(ParseResult parseResult, IConsole console)
         {
-            var subject = "CN=MCOIDC";
+            var subject = parseResult.GetValueForOption(Subject);// "CN=MCOIDC";
             {
                 using var algorithm = RSA.Create(keySizeInBits: 2048);
 
