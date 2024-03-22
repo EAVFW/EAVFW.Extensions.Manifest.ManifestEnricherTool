@@ -41,6 +41,11 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Gzip
 
         private async Task<int> Run(ParseResult parseResult, IConsole console)
         {
+            var input = Input;
+            if (input.EndsWith(".gz"))
+            {
+                Input = File.ReadAllText(Input);
+            }
             var (statusCode, output) = await GzipLogic.ConstructString(Input, UnzipOption, ZipOption, PrettyPrintOption);
 
             if (statusCode != 0 || OutputOption == null)

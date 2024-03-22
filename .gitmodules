@@ -4,3 +4,12 @@
 [submodule "external/EAVFramework"]
 	path = external/EAVFramework
 	url = https://github.com/EAVFW/EAVFramework.git
+[submodule "external/EAVFW.Extensions.WorkflowEngine"]
+	path = external/EAVFW.Extensions.WorkflowEngine
+	url = https://github.com/EAVFW/EAVFW.Extensions.WorkflowEngine.git
+[submodule "external/EAVFW.Extensions.Documents"]
+	path = external/EAVFW.Extensions.Documents
+	url = https://github.com/EAVFW/EAVFW.Extensions.Documents.git
+[submodule "external/WorkflowEngine"]
+	path = external/WorkflowEngine
+	url = https://github.com/Delegateas/WorkflowEngine.git
