@@ -50,7 +50,7 @@
     </ItemGroup>
 
     <ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
-        <PackageReference Include="EAVFramework" Version="4.2.0"/>
+        <PackageReference Include="EAVFramework" Version="$(EAVFrameworkVersion)"/>
         <PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.4.0"/>
     </ItemGroup>
 
