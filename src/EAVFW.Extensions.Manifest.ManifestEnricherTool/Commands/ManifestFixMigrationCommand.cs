@@ -1,24 +1,19 @@
 ﻿using LibGit2Sharp;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Azure.Documents;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Semver;
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 {
-   
+
     public class ManifestFixMigrationCommand : Command
     {
         public Option<string> ProjectPath = new Option<string>("--project-path", "The project path to EAV Model Project");
