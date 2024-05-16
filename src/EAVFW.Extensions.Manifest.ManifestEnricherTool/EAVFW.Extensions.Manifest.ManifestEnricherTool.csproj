@@ -14,19 +14,19 @@
 
     </PropertyGroup>
     <ItemGroup>
-        <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.26"/>
+        <PackageReference Include="DotNETDevOps.JsonFunctions" Version="3.0.26" />
 
-        <PackageReference Include="LibGit2Sharp" Version="0.27.2"/>
-        <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
-        <PackageReference Include="Semver" Version="2.2.0"/>
+        <PackageReference Include="LibGit2Sharp" Version="0.30.0" />
+        <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Semver" Version="2.2.0" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite">
             <Version>3.1.31</Version>
         </PackageReference>
@@ -44,17 +44,17 @@
 
 
     <ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
-        <ProjectReference Include="$(LocalEAVFrameworkPath)\src\EAVFramework.csproj"/>
-        <ProjectReference Include="$(LocalExternalpath)/EAVFW.Extensions.CommandLine/src/EAVFW.Extensions.CommandLine/EAVFW.Extensions.CommandLine.csproj"/>
+        <ProjectReference Include="$(LocalEAVFrameworkPath)\src\EAVFramework.csproj" />
+        <ProjectReference Include="$(LocalExternalpath)/EAVFW.Extensions.CommandLine/src/EAVFW.Extensions.CommandLine/EAVFW.Extensions.CommandLine.csproj" />
     </ItemGroup>
 
     <ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
-        <PackageReference Include="EAVFramework" Version="$(EAVFrameworkVersion)"/>
-        <PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.4.0"/>
+        <PackageReference Include="EAVFramework" Version="$(EAVFrameworkVersion)" />
+        <PackageReference Include="EAVFW.Extensions.CommandLine" Version="1.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj"/>
-        <ProjectReference Include="..\EAVFW.Extensions.Docs.Generator\EAVFW.Extensions.Docs.Generator.csproj"/>
+        <ProjectReference Include="..\EAVFW.Extensions.Docs.Extractor\EAVFW.Extensions.Docs.Extractor.csproj" />
+        <ProjectReference Include="..\EAVFW.Extensions.Docs.Generator\EAVFW.Extensions.Docs.Generator.csproj" />
     </ItemGroup>
 </Project>

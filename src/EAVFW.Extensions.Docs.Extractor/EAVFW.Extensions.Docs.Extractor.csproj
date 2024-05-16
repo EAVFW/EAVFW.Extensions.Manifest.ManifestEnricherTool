@@ -14,12 +14,12 @@
     </ItemGroup>
 
     <ItemGroup Condition="$(UseEAVFromNuget) != 'false'">
-        <PackageReference Include="EAVFW.Extensions.Manifest.SDK" Version="4.2.0"/>
-        <PackageReference Include="EAVFW.Extensions.WorkflowEngine" Version="3.1.4" />
+        <PackageReference Include="EAVFW.Extensions.Manifest.SDK" Version="$(EAVFrameworkVersion)" />
+        <PackageReference Include="EAVFW.Extensions.WorkflowEngine" Version="3.1.7" />
     </ItemGroup>
 
     <ItemGroup Condition="$(UseEAVFromNuget) == 'false'">
-		<ProjectReference Include="$(LocalExternalpath)/EAVFramework/sdk/EAVFW.Extensions.Manifest.SDK.csproj"/>
+		<ProjectReference Include="$(LocalExternalpath)/EAVFramework/sdk/EAVFW.Extensions.Manifest.SDK.csproj" />
         <ProjectReference Include="$(LocalExternalpath)/EAVFramework/src/EAVFramework.csproj" />
 		<ProjectReference Include="$(LocalExternalpath)/EAVFW.Extensions.WorkflowEngine/src/EAVFW.Extensions.WorkflowEngine/EAVFW.Extensions.WorkflowEngine.csproj" />
     </ItemGroup>
