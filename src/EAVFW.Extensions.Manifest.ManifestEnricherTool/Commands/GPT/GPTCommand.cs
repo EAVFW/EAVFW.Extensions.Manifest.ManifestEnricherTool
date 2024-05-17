@@ -39,7 +39,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.GPT
 
             }
             Directory.CreateDirectory(folder);
-            var repoPath = LibGit2Sharp.Repository.Clone(Project, folder, new CloneOptions {   Checkout = true, FetchOptions = new FetchOptions {  } });
+            var repoPath = LibGit2Sharp.Repository.Clone(Project, folder, new CloneOptions {   Checkout = true, FetchOptions = {  } });
             try
             {
                 console.WriteLine(repoPath);
