@@ -30,6 +30,8 @@
 
       "workingDirectory": "C:\\dev\\GroupOnline\\QuotationPlatform",
       "commandLineArgs": "sql ./src/GroupOnline.Models"
+     //"workingDirectory": "C:\\dev\\GroupOnline\\QuotationPlatform\\src\\GroupOnline.Models",
+     // "commandLineArgs": "--path C:\\dev\\GroupOnline\\QuotationPlatform\\src\\GroupOnline.Models\\manifest.json --customizationprefix GroupOnline"
 
     }
   }
