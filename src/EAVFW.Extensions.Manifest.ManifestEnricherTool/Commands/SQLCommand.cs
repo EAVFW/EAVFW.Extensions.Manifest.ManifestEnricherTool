@@ -49,6 +49,8 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
             Handler = CommandHandler.Create<ParseResult, IConsole>(Run);
             
             Add(new SQLApplyCommand());
+            Add(new SQLUserCommand());
+            
            
             this.generator = generator;
         }

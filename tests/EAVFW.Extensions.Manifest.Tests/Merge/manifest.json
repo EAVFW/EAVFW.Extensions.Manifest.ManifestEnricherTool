@@ -1,0 +1,33 @@
+{
+  "variables": {
+    "Audit": {
+      "CreatedOn": {
+        "type": "DateTime"
+      }
+    },
+    "Administrative": {
+      "tab": "TAB_Administrative"
+    }
+  },
+  "entities": {
+    "System User": {
+      "pluralName": "System Users",
+      "attributes": {
+        "Email": {
+          "type": "Text"
+        },
+        "Name": {
+          "type": "Text"
+        }
+      }
+    },
+    "Identity": {
+      "pluralName": "Identities",
+      "attributes": {
+        "Name": {
+          "type": "Text"
+        }
+      }
+    }
+  }
+}
