@@ -48,6 +48,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Docs.Extra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Docs.Generator", "src\EAVFW.Extensions.Docs.Generator\EAVFW.Extensions.Docs.Generator.csproj", "{D03D5862-7B6F-4E46-83E1-D24CF0038D1C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Documents", "external\EAVFW.Extensions.Documents\src\EAVFW.Extensions.Documents\EAVFW.Extensions.Documents.csproj", "{E3752A2B-6130-4878-9675-60C391FDFEBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.WorkflowEngine", "external\EAVFW.Extensions.WorkflowEngine\src\EAVFW.Extensions.WorkflowEngine\EAVFW.Extensions.WorkflowEngine.csproj", "{51ADCF4C-64A3-43D0-8D42-1D28826BF6DE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowEngine.Core", "external\WorkflowEngine\src\WorkflowEngine.Core\WorkflowEngine.Core.csproj", "{F2E3D287-227B-40AA-8CE0-469AC9173B41}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowEngine.Hangfire", "external\WorkflowEngine\src\WorkflowEngine.Hangfire\WorkflowEngine.Hangfire.csproj", "{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +87,18 @@ Global
 		{D03D5862-7B6F-4E46-83E1-D24CF0038D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D03D5862-7B6F-4E46-83E1-D24CF0038D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D03D5862-7B6F-4E46-83E1-D24CF0038D1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3752A2B-6130-4878-9675-60C391FDFEBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3752A2B-6130-4878-9675-60C391FDFEBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3752A2B-6130-4878-9675-60C391FDFEBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51ADCF4C-64A3-43D0-8D42-1D28826BF6DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51ADCF4C-64A3-43D0-8D42-1D28826BF6DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51ADCF4C-64A3-43D0-8D42-1D28826BF6DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E3D287-227B-40AA-8CE0-469AC9173B41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2E3D287-227B-40AA-8CE0-469AC9173B41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2E3D287-227B-40AA-8CE0-469AC9173B41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +112,10 @@ Global
 		{3BEF0769-ABD1-4D34-8004-C98DE9FB0339} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 		{28A8781C-D30A-4589-9D96-399ED8D2A6B4} = {0D61C87C-0809-4CD7-9200-D78AD11A1E22}
 		{D03D5862-7B6F-4E46-83E1-D24CF0038D1C} = {0D61C87C-0809-4CD7-9200-D78AD11A1E22}
+		{E3752A2B-6130-4878-9675-60C391FDFEBE} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
+		{51ADCF4C-64A3-43D0-8D42-1D28826BF6DE} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
+		{F2E3D287-227B-40AA-8CE0-469AC9173B41} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
+		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {036D5D82-DDA4-4600-B190-739D512F1062}
