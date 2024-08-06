@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Threading.Tasks;
 using EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands.Gzip;
+using EAVFW.Extensions.Manifest.SDK.Migrations;
 
 namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
 {
@@ -27,7 +28,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool
                })
                .AddManifestSDK<SQLClientParameterGenerator>()              
                .AddSingleton<App>();
-
+            serviceCollection.AddScoped<SQLMigrationGenerator>();
             serviceCollection.AddSingleton<Command, InstallCommand>();
             serviceCollection.AddSingleton<Command, SQLCommand>();
             serviceCollection.AddSingleton<Command, ManifestCommand>();
