@@ -125,6 +125,7 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         public Option<string> Token = new Option<string>("Token", "");
         public Option<string> Server = new Option<string>("Server", "");
         public Option<string> DatabaseName = new Option<string>("DatabaseName", "");
+        public Option<string> Query = new Option<string>("Query", "");
 
         public Option<string[]> Replacements = new Option<string[]>("Values");
         public Option<string[]> Files = new Option<string[]>("Files");
@@ -139,14 +140,16 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
             ClientId.AddAlias("--client-id");
             Add(ClientId);
+
             DatabaseName.AddAlias("-d");
             Add(DatabaseName);
 
             Replacements.AddAlias("-v");
             Add(Replacements);
-
-
             Replacements.AllowMultipleArgumentsPerToken = true;
+
+            Query.AddAlias("-Q");
+            Add(Query);
 
             Files.AddAlias("-i");
             Add(Files);
@@ -236,6 +239,15 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
 
                 }
 
+                if(arg1.GetValueForOption(Query) is string query && !string.IsNullOrEmpty(query))
+                {
+                    using var cmd = conn.CreateCommand();
+
+                    cmd.CommandText = query.Trim();
+
+                    var r = await cmd.ExecuteScalarAsync();
+                    Console.WriteLine("Result: " + r);
+                }
             }
         }
 
