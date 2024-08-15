@@ -148,7 +148,7 @@ namespace EAVFW.Extensions.Docs.Generator
                     foreach (var (k, triggerDefinition) in wizardDefinition.Triggers)
                     {
                         if (string.IsNullOrWhiteSpace(triggerDefinition.Form))
-                            await writer.WriteLineAsync($"| Ribbon | {triggerDefinition.Ribbon} |");
+                            await writer.WriteLineAsync($"| Ribbon | {triggerDefinition.AdditionalFields["Ribbon"]?.ToString()} |");
                         else
                             await writer.WriteLineAsync($"| Form | {triggerDefinition.Form} |");
                     }
