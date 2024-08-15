@@ -13,3 +13,6 @@
 [submodule "external/WorkflowEngine"]
 	path = external/WorkflowEngine
 	url = https://github.com/Delegateas/WorkflowEngine.git
+[submodule "external/EAVFW.Extensions.Configuration"]
+	path = external/EAVFW.Extensions.Configuration
+	url = https://github.com/EAVFW/EAVFW.Extensions.Configuration.git

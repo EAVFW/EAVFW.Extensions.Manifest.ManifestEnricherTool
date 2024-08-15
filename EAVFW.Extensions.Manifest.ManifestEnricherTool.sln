@@ -56,6 +56,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowEngine.Core", "exte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowEngine.Hangfire", "external\WorkflowEngine\src\WorkflowEngine.Hangfire\WorkflowEngine.Hangfire.csproj", "{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Configuration", "external\EAVFW.Extensions.Configuration\src\EAVFW.Extensions.Configuration\EAVFW.Extensions.Configuration.csproj", "{133582D7-87DA-497B-9E59-77DC92E60D5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{133582D7-87DA-497B-9E59-77DC92E60D5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{133582D7-87DA-497B-9E59-77DC92E60D5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{133582D7-87DA-497B-9E59-77DC92E60D5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{133582D7-87DA-497B-9E59-77DC92E60D5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{51ADCF4C-64A3-43D0-8D42-1D28826BF6DE} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 		{F2E3D287-227B-40AA-8CE0-469AC9173B41} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
+		{133582D7-87DA-497B-9E59-77DC92E60D5F} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {036D5D82-DDA4-4600-B190-739D512F1062}
