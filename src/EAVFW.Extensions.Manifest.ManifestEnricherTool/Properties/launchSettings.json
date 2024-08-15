@@ -2,8 +2,10 @@
   "profiles": {
     "EAVFW.Extensions.Manifest.ManifestEnricherTool": {
       "commandName": "Project",
-      "workingDirectory": "C:/dev2/medlemscentralen",
-      "commandLineArgs": "sql ./src/MC.Models"
+      // "workingDirectory": "C:/dev2/medlemscentralen",
+      // "commandLineArgs": "sql ./src/MC.Models",
+      "workingDirectory": "C:/dev/GroupOnline/QuotationPlatform",
+      "commandLineArgs": "sql ./src/GroupOnline.Models"
 
       //"workingDirectory": "C:/dev2/medlemscentralen/src/MC.Models",
       //   "commandLineArgs": "--path C:\\dev2\\MedlemsCentralen\\src\\MC.Models\\manifest.json --customizationprefix MC",
