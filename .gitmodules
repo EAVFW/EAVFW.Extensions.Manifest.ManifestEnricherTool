@@ -16,3 +16,6 @@
 [submodule "external/EAVFW.Extensions.Configuration"]
 	path = external/EAVFW.Extensions.Configuration
 	url = https://github.com/EAVFW/EAVFW.Extensions.Configuration.git
+[submodule "external/ExpressionEngine"]
+	path = external/ExpressionEngine
+	url = https://github.com/delegateas/ExpressionEngine

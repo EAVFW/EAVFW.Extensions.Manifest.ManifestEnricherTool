@@ -1,7 +1,7 @@
 ﻿<Project>
  <PropertyGroup>
    <LangVersion>11.0</LangVersion>
-   <EAVFrameworkVersion>5.0.0-dev.1</EAVFrameworkVersion>
+   <EAVFrameworkVersion>5.0.0-dev.2</EAVFrameworkVersion>
    <UseEAVFromNuget>true</UseEAVFromNuget>
    <LocalEAVFrameworkPath>$(MSBuildThisFileDirectory)/external/EAVFramework</LocalEAVFrameworkPath>
    <LocalExternalpath>$(MSBuildThisFileDirectory)/external</LocalExternalpath>

@@ -59,6 +59,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowEngine.Hangfire", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EAVFW.Extensions.Configuration", "external\EAVFW.Extensions.Configuration\src\EAVFW.Extensions.Configuration\EAVFW.Extensions.Configuration.csproj", "{133582D7-87DA-497B-9E59-77DC92E60D5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionEngine", "external\ExpressionEngine\ExpressionEngine\ExpressionEngine.csproj", "{14624DC8-2E21-4163-A238-12D01CA09843}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,9 @@ Global
 		{133582D7-87DA-497B-9E59-77DC92E60D5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{133582D7-87DA-497B-9E59-77DC92E60D5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{133582D7-87DA-497B-9E59-77DC92E60D5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14624DC8-2E21-4163-A238-12D01CA09843}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14624DC8-2E21-4163-A238-12D01CA09843}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14624DC8-2E21-4163-A238-12D01CA09843}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +128,7 @@ Global
 		{F2E3D287-227B-40AA-8CE0-469AC9173B41} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 		{8BDF17C3-3F2C-406A-8ABB-0A54FBD7E8F7} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 		{133582D7-87DA-497B-9E59-77DC92E60D5F} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
+		{14624DC8-2E21-4163-A238-12D01CA09843} = {CAE8FBC9-BDC3-4F45-81E1-57506D609011}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {036D5D82-DDA4-4600-B190-739D512F1062}
