@@ -41,7 +41,16 @@ namespace EAVFW.Extensions.Manifest.ManifestEnricherTool.Commands
         {
            
             
-            using var repo = new Repository(ProjectPath.GetValue(parseResult));
+
+            // Try to find the git repository root from the project path
+            var repoRoot = GitRepositoryLocator.FindGitRepositoryRoot(ProjectPath.GetValue(parseResult));
+            if (repoRoot == null)
+            {
+                logger.LogWarning("No Git repository found for the specified project path: {Path}", ProjectPath.GetValue(parseResult));
+                // Optionally, you could return here or continue without git features
+                return;
+            }
+            using var repo = new Repository(repoRoot);
 
             if(repo.Diff.Compare<TreeChanges>(new[] { "*manifest*.json" }).Any())
             {
